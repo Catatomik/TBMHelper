@@ -41,6 +41,7 @@ const selectedStops = ref<FullyDescribedStop[]>([]);
           type="text"
           placeholder="Chercher un arrêt..."
           list="selectedStops"
+          :value="stopInput"
           @input="(stopInput = ($event.target as HTMLInputElement).value), refreshStops()"
           @keyup.enter="addCurrentStop()"
         />

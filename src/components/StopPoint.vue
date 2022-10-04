@@ -1,12 +1,5 @@
 <script setup lang="ts">
-import {
-  fetchRouteRealtime,
-  duration,
-  type Route,
-  type RouteRealtime,
-  type RouteRealtimeInfos,
-  type StopPoint,
-} from "@/store";
+import { fetchRouteRealtime, duration, type Route, type RouteRealtime, type StopPoint } from "@/store";
 import { ref } from "vue";
 
 interface Props {
@@ -34,15 +27,10 @@ function refreshRouteRealtime(route: Route, intId?: number) {
       intId = setInterval(() => {
         if ("destinations" in realtimeRoutesSchedules.value[route.id]) {
           const rrs = realtimeRoutesSchedules.value[route.id] as RouteRealtime & { route: Route };
-          rrs.destinations = (
-            Object.keys(rrs.destinations) as Array<keyof typeof rrs["destinations"]>
-          ).reduce(
-            (acc, val) => ({
-              ...acc,
-              ...rrs.destinations[val].map((rri) => ({ ...rri, waittime: rri.waittime - 1_000 })),
-            }),
-            {},
-          );
+          rrs.destinations = rrs.destinations.map((d) => ({
+            ...d,
+            waittime: d.waittime - 1_000,
+          }));
         }
       }, 1_000);
     setTimeout(() => {
@@ -77,7 +65,7 @@ function refreshRouteRealtime(route: Route, intId?: number) {
       <ul v-else>
         <li
           class="list-disc list-inside mx-3"
-          v-for="realtimeRoutesScheduleData of (Object.keys(realtimeRoutesSchedule.destinations) as Array<keyof typeof realtimeRoutesSchedule['destinations']>).reduce((acc, val) => [...acc, ...realtimeRoutesSchedule.destinations[val]], [] as RouteRealtimeInfos<'TREATED'>[])"
+          v-for="realtimeRoutesScheduleData of realtimeRoutesSchedule.destinations"
           :key="realtimeRoutesScheduleData.trip_id"
         >
           {{ duration(realtimeRoutesScheduleData.waittime, true, true) }} ± 10s

@@ -94,9 +94,11 @@ type RouteRealtimeInfos<T> = {
 };
 
 interface RouteRealtime<T extends RRIStats = "TREATED"> {
-  destinations: {
-    [x: string]: RouteRealtimeInfos<T>[];
-  };
+  destinations: T extends "RAW"
+    ? {
+        [x: string]: RouteRealtimeInfos<T>[];
+      }
+    : RouteRealtimeInfos<T>[];
 }
 
 async function fetchRouteRealtime(stopPointId: string, route: Route): Promise<RouteRealtime | null> {
@@ -109,7 +111,7 @@ async function fetchRouteRealtime(stopPointId: string, route: Route): Promise<Ro
     ).data as RouteRealtime<"RAW">;
     return {
       destinations: (Object.keys(result.destinations) as Array<keyof typeof result["destinations"]>).reduce(
-        (acc, val) => ({
+        (acc, val) => [
           ...acc,
           ...result.destinations[val].map((rri) => ({
             ...rri,
@@ -117,8 +119,8 @@ async function fetchRouteRealtime(stopPointId: string, route: Route): Promise<Ro
               .match(/\d{2}/g)!
               .reduce((acc, val, i) => acc + parseInt(val) * 60 ** (2 - i) * 1000, 0),
           })),
-        }),
-        {},
+        ],
+        [] as RouteRealtimeInfos<"TREATED">[],
       ),
     };
   } catch (_) {

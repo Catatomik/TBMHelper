@@ -75,7 +75,7 @@ function refreshRouteRealtime(route: Route, intId?: number) {
               realtimeRoutesScheduleData.waittime < 3 * 60_000
                 ? 'text-red-500'
                 : realtimeRoutesScheduleData.waittime < 5 * 60_000
-                ? 'text-red-400'
+                ? 'text-orange-500'
                 : realtimeRoutesScheduleData.waittime < 10 * 60_000
                 ? 'text-emerald-500'
                 : '',

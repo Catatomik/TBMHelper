@@ -44,7 +44,7 @@ function refreshRouteRealtime(route: Route, intId?: number) {
   <div class="rounded-lg p-3 shadow-xl">
     <div class="flex justify-center items-center">
       <h3 class="text-center font-bold text-lg">📍 {{ stopPoint.name }}</h3>
-      <button class="ml-2 border-4 rounded-lg border-red-500 text-center" @click="emit('delete')">❌</button>
+      <button class="ml-2 border-4 rounded-lg border-red-500 text-center select-none" @click="emit('delete')">❌</button>
     </div>
     <hr class="my-2" />
     <span v-for="(realtimeRoutesSchedule, i) of realtimeRoutesSchedules" :key="i">

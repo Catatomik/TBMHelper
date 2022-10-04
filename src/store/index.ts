@@ -104,7 +104,10 @@ interface RouteRealtime<T extends RRIStats = "TREATED"> {
 async function fetchRouteRealtime(stopPointId: string, route: Route): Promise<RouteRealtime | null> {
   const vehicleCode = route.line.id.includes("TBC")
     ? route.line.id.match(/(?<=TBC:)\d+/)![0]
-    : route.line.name.match(/[A-Z]$/)![0];
+    : route.line.id.includes("TBT")
+    ? route.line.name.match(/[A-Z]$/)![0]
+    : null;
+  if (!vehicleCode) return null;
   try {
     const result = (
       await instance.get(`get-realtime-pass/${stopPointId}/${vehicleCode}/${encodeURI(route.id)}`)

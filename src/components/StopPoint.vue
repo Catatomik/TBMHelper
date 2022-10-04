@@ -22,12 +22,12 @@ for (const route of props.stopPoint.routes) refreshRouteRealtime(route);
 function refreshRouteRealtime(route: Route, intId?: number) {
   fetchRouteRealtime(stopPointId, route).then((r) => {
     if (intId) clearInterval(intId);
-    realtimeRoutesSchedules.value[route.id] = r ? { ...r, route } : { route };
+    realtimeRoutesSchedules.value[route.id] = r ? { destinations: r.destinations.sort((a, b) => a.waittime - b.waittime), route } : { route };
     if (r)
       intId = setInterval(() => {
         if ("destinations" in realtimeRoutesSchedules.value[route.id]) {
           const rrs = realtimeRoutesSchedules.value[route.id] as RouteRealtime & { route: Route };
-          rrs.destinations = rrs.destinations.sort((a, b) => a.waittime - b.waittime).map((d) => ({
+          rrs.destinations = rrs.destinations.map((d) => ({
             ...d,
             waittime: d.waittime > 1_000 ? d.waittime - 1_000 : 0,
           }));

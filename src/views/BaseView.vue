@@ -8,30 +8,43 @@ import {
   type StopPoint,
 } from "@/store";
 import { onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { onBeforeRouteUpdate, useRoute } from "vue-router";
 import StopPointComp from "../components/StopPoint.vue";
 
 const route = useRoute();
-const query = { ...route.query };
+let query = { ...route.query };
+let queryInternallyUpdated = false;
 
-onMounted(async () => {
-  for (const k in route.query) {
-    const providenStop = route.query[k] as string;
+onMounted(queryUpdated);
+onBeforeRouteUpdate((to) => queryUpdated(to));
+
+async function queryUpdated(to = route) {
+  if (queryInternallyUpdated) return (queryInternallyUpdated = false);
+  query = { ...route.query };
+  for (const k in to.query) {
+    const providenStop = to.query[k] as string;
+
+    if (selectedStops.value.find((s) => s.name === providenStop)) continue;
     const found = (await fetchStops(providenStop)).find((s) => s.name === providenStop);
     if (!found) {
       delete query[k];
+      queryInternallyUpdated = true;
       router.push({ query });
       continue;
     }
     const fullyDescribedStop = await fetchStopDetails(found);
     if (!fullyDescribedStop) {
       delete query[k];
+      queryInternallyUpdated = true;
       router.push({ query });
       continue;
     }
     selectedStops.value.push(fullyDescribedStop);
   }
-});
+
+  const providenStops = Object.keys(query).map((k) => query[k]);
+  selectedStops.value = selectedStops.value.filter((s) => providenStops.includes(s.name));
+}
 
 const stopInput = ref<string>("");
 const stops = ref<StopArea[]>([]);

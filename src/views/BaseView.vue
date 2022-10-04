@@ -51,6 +51,7 @@ async function queryUpdated(to = route) {
 
 const stopInput = ref<string>("");
 const stops = ref<StopArea[]>([]);
+const selectedStops = ref<FullyDescribedStop[]>([]);
 
 async function refreshStops() {
   if (await addCurrentStop()) return;
@@ -75,7 +76,21 @@ async function addCurrentStop() {
   return true;
 }
 
-const selectedStops = ref<FullyDescribedStop[]>([]);
+function removeStop(stop: FullyDescribedStop) {
+  selectedStops.value = selectedStops.value.filter(s => s.id != stop.id);
+  
+  let queryNeedUpdate = false;
+  Object.keys(query).forEach(k => {
+    if (query[k] === stop.name)  {
+      queryNeedUpdate = true;
+      delete query[k]
+  }
+  if (queryNeedUpdate) {
+    queryInternallyUpdated = true;
+    router.push({ query });
+  }
+  })
+}
 </script>
 
 <template>
@@ -103,9 +118,7 @@ const selectedStops = ref<FullyDescribedStop[]>([]);
           :key="stopPoint.id"
           :stop-point="stopPoint"
           @delete="
-            selectedStops.forEach(
-              (s) => (s.details.stopPoints = s.details.stopPoints.filter((sp) => sp.id != stopPoint.id)),
-            )
+            removeStop(selectedStops.find(s => s.details.stopPoints.find(sp => sp.id === stopPoint.id)) as FullyDescribedStop);
           "
         />
       </div>

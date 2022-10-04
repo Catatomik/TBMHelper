@@ -27,9 +27,9 @@ function refreshRouteRealtime(route: Route, intId?: number) {
       intId = setInterval(() => {
         if ("destinations" in realtimeRoutesSchedules.value[route.id]) {
           const rrs = realtimeRoutesSchedules.value[route.id] as RouteRealtime & { route: Route };
-          rrs.destinations = rrs.destinations.map((d) => ({
+          rrs.destinations = rrs.destinations.sort((a, b) => a.waittime - b.waittime).map((d) => ({
             ...d,
-            waittime: d.waittime - 1_000,
+            waittime: d.waittime > 1_000 ? d.waittime - 1_000 : 0,
           }));
         }
       }, 1_000);

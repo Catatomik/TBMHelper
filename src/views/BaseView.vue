@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import router from "@/router";
 import {
   fetchStopDetails,
   fetchStops,
@@ -6,11 +7,33 @@ import {
   type StopArea,
   type StopPoint,
 } from "@/store";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
+import { useRoute } from "vue-router";
 import StopPointComp from "../components/StopPoint.vue";
 
-const stopInput = ref<string>("");
+const route = useRoute();
+const query = { ...route.query };
 
+onMounted(async () => {
+  for (const k in route.query) {
+    const providenStop = route.query[k] as string;
+    const found = (await fetchStops(providenStop)).find((s) => s.name === providenStop);
+    if (!found) {
+      delete query[k];
+      router.push({ query });
+      continue;
+    }
+    const fullyDescribedStop = await fetchStopDetails(found);
+    if (!fullyDescribedStop) {
+      delete query[k];
+      router.push({ query });
+      continue;
+    }
+    selectedStops.value.push(fullyDescribedStop);
+  }
+});
+
+const stopInput = ref<string>("");
 const stops = ref<StopArea[]>([]);
 
 async function refreshStops() {
@@ -25,6 +48,8 @@ async function addCurrentStop() {
   const fullyDescribedStop = await fetchStopDetails(found);
   if (!fullyDescribedStop) return false; // display error
   selectedStops.value.push(fullyDescribedStop);
+  query[Object.keys(route.query).length + 1] = fullyDescribedStop.name;
+  router.push({ query: query });
   stopInput.value = "";
   stops.value = [];
   return true;

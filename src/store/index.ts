@@ -2,7 +2,7 @@ import axios from "axios";
 
 const instance = axios.create({
   baseURL: "https://ws.infotbm.com/ws/1.0/",
-  timeout: 2000,
+  timeout: 5_000,
 });
 
 interface StopArea {

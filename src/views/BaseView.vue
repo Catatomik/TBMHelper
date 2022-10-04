@@ -14,6 +14,7 @@ const stopInput = ref<string>("");
 const stops = ref<StopArea[]>([]);
 
 async function refreshStops() {
+  if (await addCurrentStop()) return;
   if (stopInput.value.length < 4) return (stops.value = []);
   stops.value = await fetchStops(stopInput.value);
 }

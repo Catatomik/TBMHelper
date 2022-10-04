@@ -70,7 +70,18 @@ function refreshRouteRealtime(route: Route, intId?: number) {
           v-for="realtimeRoutesScheduleData of realtimeRoutesSchedule.destinations"
           :key="realtimeRoutesScheduleData.trip_id"
         >
-          {{ duration(realtimeRoutesScheduleData.waittime, true, true) }} ± 10s
+          <span
+            :class="[
+              realtimeRoutesScheduleData.waittime < 3 * 60_000
+                ? 'text-red-500'
+                : realtimeRoutesScheduleData.waittime < 5 * 60_000
+                ? 'text-red-400'
+                : realtimeRoutesScheduleData.waittime < 10 * 60_000
+                ? 'text-emerald-500'
+                : '',
+            ]"
+            >{{ duration(realtimeRoutesScheduleData.waittime, true, true) }} ± 10s</span
+          >
         </li>
       </ul>
       <br />

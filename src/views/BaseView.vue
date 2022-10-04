@@ -19,8 +19,11 @@ onMounted(queryUpdated);
 onBeforeRouteUpdate((to) => queryUpdated(to));
 
 async function queryUpdated(to = route) {
-  if (queryInternallyUpdated) return (queryInternallyUpdated = false);
-  query = { ...route.query };
+  if (queryInternallyUpdated) {
+    queryInternallyUpdated = false;
+    return;
+  }
+  query = { ...to.query };
   for (const k in to.query) {
     const providenStop = to.query[k] as string;
 
@@ -39,7 +42,7 @@ async function queryUpdated(to = route) {
       router.push({ query });
       continue;
     }
-    selectedStops.value.push(fullyDescribedStop);
+    selectedStops.value = [...selectedStops.value, fullyDescribedStop];
   }
 
   const providenStops = Object.keys(query).map((k) => query[k]);
@@ -60,9 +63,13 @@ async function addCurrentStop() {
   if (!found) return false; // display error
   const fullyDescribedStop = await fetchStopDetails(found);
   if (!fullyDescribedStop) return false; // display error
-  selectedStops.value.push(fullyDescribedStop);
-  query[Object.keys(route.query).length + 1] = fullyDescribedStop.name;
-  router.push({ query: query });
+
+  query[Object.keys(query).length + 1] = fullyDescribedStop.name;
+  queryInternallyUpdated = true;
+  router.push({ query });
+
+  selectedStops.value = [...selectedStops.value, fullyDescribedStop];
+
   stopInput.value = "";
   stops.value = [];
   return true;

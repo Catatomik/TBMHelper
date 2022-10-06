@@ -23,15 +23,17 @@ async function fetchStops(stop: string): Promise<StopArea[]> {
   }
 }
 
+interface Line {
+  id: `line:${string}`;
+  isChartered: boolean;
+  isHidden: boolean;
+  isSpecial: boolean;
+  name: string;
+}
+
 interface Route {
   id: `route:${string}`;
-  line: {
-    id: `line:${string}`;
-    isChartered: boolean;
-    isHidden: boolean;
-    isSpecial: boolean;
-    name: string; // line name
-  };
+  line: Line;
   name: string; // route destination
 }
 
@@ -42,7 +44,7 @@ interface StopPoint {
   routes: Route[];
 }
 
-interface StopDetails {
+interface StopAreaDetails {
   city: string;
   id: `stop_area:${string}`;
   latitude: string;
@@ -51,15 +53,85 @@ interface StopDetails {
   stopPoints: StopPoint[];
 }
 
-type FullyDescribedStop = StopArea & { details: StopDetails };
+type FullyDescribedStop = StopArea & { details: StopAreaDetails };
 
-async function fetchStopDetails(stop: StopArea): Promise<FullyDescribedStop | null> {
+async function fetchStopAreaDetails(stop: StopArea): Promise<FullyDescribedStop | null> {
   try {
     return {
       ...stop,
       details: (await instance.get(`network/stoparea-informations/${encodeURI(stop.id)}`))
-        .data as StopDetails,
+        .data as StopAreaDetails,
     };
+  } catch (_) {
+    return null;
+  }
+}
+
+interface Schedules {
+  day: number;
+  datetimes: {
+    [date: string]: {
+      datetime: string;
+      directionName: string;
+      timestamp: number;
+      vehicle_journey: `vehicle_journey:${string}`;
+    }[];
+  };
+  destinations: string[];
+}
+
+interface StopPointDetails {
+  externalCode: string;
+  hasWheelchairBoarding: false;
+  id: `stop_point:${string}`;
+  latitude: string;
+  longitude: string;
+  name: string;
+  route: Omit<Route, "line"> & {
+    line: Omit<Line, "isSpecial" | "isHidden" | "isChartered" | "name"> & { type: string };
+  };
+  schedules: Schedules;
+  stopAreaId: `stop_area:${string}`;
+}
+
+async function fetchStopPointDetails(route: Route, stop: StopPoint): Promise<StopPointDetails | null> {
+  try {
+    return (await instance.get(`stop-points-informations/${encodeURI(route.id)}/${encodeURI(stop.id)}`))
+      .data as StopPointDetails;
+  } catch (_) {
+    return null;
+  }
+}
+
+interface LineDetails {
+  code: string;
+  color: string;
+  externalCode: string;
+  id: `line:${string}`;
+  impacts: {
+    alert: {
+      alertUpdates: unknown[];
+      cause: number;
+      causeName: string;
+      description: string;
+      id: number;
+      title: string;
+      type: number;
+      typeName: string;
+      workingNetwork: boolean;
+    };
+    transportMode: number;
+  }[];
+  name: string;
+  picto: string; // URL
+  pictoCrossed: string;
+  textColor: string; // HEX color
+  transportMode: number;
+}
+
+async function fetchLineDetails(line: Line): Promise<LineDetails[] | null> {
+  try {
+    return (await instance.get(`alerts/by-transport/${encodeURI(line.id)}`)).data as LineDetails[];
   } catch (_) {
     return null;
   }
@@ -101,16 +173,17 @@ interface RouteRealtime<T extends RRIStats = "TREATED"> {
     : RouteRealtimeInfos<T>[];
 }
 
-async function fetchRouteRealtime(stopPointId: string, route: Route): Promise<RouteRealtime | null> {
-  const vehicleCode = route.line.id.includes("TBC")
-    ? route.line.id.match(/(?<=TBC:)\d+/)![0]
-    : route.line.id.includes("TBT")
-    ? route.line.name.match(/[A-Z]$/)![0]
-    : null;
-  if (!vehicleCode) throw new Error("Transport non implémenté");
-
+async function fetchRouteRealtime(
+  stopPointDetails: StopPointDetails,
+  lineDetails: LineDetails | { externalCode: string },
+  route: Route,
+): Promise<RouteRealtime | null> {
   const result = (
-    await instance.get(`get-realtime-pass/${stopPointId}/${vehicleCode}/${encodeURI(route.id)}`)
+    await instance.get(
+      `get-realtime-pass/${encodeURI(stopPointDetails.externalCode)}/${encodeURI(
+        lineDetails.externalCode,
+      )}/${encodeURI(route.id)}`,
+    )
   ).data as RouteRealtime<"RAW">;
   return {
     destinations: (Object.keys(result.destinations) as Array<keyof typeof result["destinations"]>).reduce(
@@ -160,14 +233,13 @@ function duration(ms: number, includeSec = true, short = false): string {
   }${s > 0 && includeSec ? `${s}${short ? "s" : ` seconde${ss}`} ` : ""}`.replace(/ $/g, "");
 }
 
-export { fetchStops, fetchStopDetails, fetchRouteRealtime, duration };
-
-export type {
-  StopArea,
-  Route,
-  StopPoint,
-  StopDetails,
-  FullyDescribedStop,
-  RouteRealtimeInfos,
-  RouteRealtime,
+export {
+  fetchStops,
+  fetchStopAreaDetails,
+  fetchStopPointDetails,
+  fetchLineDetails,
+  fetchRouteRealtime,
+  duration,
 };
+
+export type { StopArea, StopPoint, StopPointDetails, LineDetails, Route, FullyDescribedStop, RouteRealtime };

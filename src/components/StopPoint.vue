@@ -1,5 +1,15 @@
 <script setup lang="ts">
-import { fetchRouteRealtime, duration, type Route, type RouteRealtime, type StopPoint } from "@/store";
+import {
+  fetchRouteRealtime,
+  duration,
+  type Route,
+  type RouteRealtime,
+  type StopPoint,
+  fetchStopPointDetails,
+  fetchLineDetails,
+  type StopPointDetails,
+  type LineDetails,
+} from "@/store";
 import { ref } from "vue";
 
 interface Props {
@@ -11,24 +21,46 @@ const emit = defineEmits<{
   (e: "delete"): void;
 }>();
 
-const stopPointId = props.stopPoint.id.match(/\d+$/)![0];
-
 enum FetchStatus {
   Errored = 0,
   Fetching = 1,
   Fetched = 2,
 }
-type OperatingRoute = Route & { fetch: FetchStatus };
+type OperatingRoute = Route & { stopPointDetails: StopPointDetails } & {
+  lineDetails: LineDetails | { externalCode: string };
+} & { fetch: FetchStatus };
 
 const realtimeRoutesSchedules = ref<{
   [x: Route["id"]]: (RouteRealtime & { route: OperatingRoute }) | { route: OperatingRoute };
 }>({});
 
-for (const route of props.stopPoint.routes) refreshRouteRealtime({ ...route, fetch: FetchStatus.Fetching });
+fetchStopPointDetails(props.stopPoint.routes[0], props.stopPoint).then((stopPointDetails) => {
+  if (!stopPointDetails) return;
+  props.stopPoint.routes.forEach(async (route) => {
+    const lineDetails = await fetchLineDetails(route.line);
+    if (!lineDetails) return;
+    refreshRouteRealtime({
+      ...route,
+      stopPointDetails,
+      lineDetails: lineDetails.length
+        ? lineDetails[0]
+        : {
+            externalCode: route.line.id.includes("TBT")
+              ? route.line.name.match(/[A-Z]$/)![0]
+              : route.line.id.includes("GIRONDE") // TransGironde
+              ? route.line.id.match(/[A-Z]+:Line:\d+(_R)?$/)![0]
+              : route.line.id.includes("SNC") // SNCF
+              ? route.line.id.match(/[A-Z]+-[0-9]+$/)![0]
+              : "Will be errored if reached",
+          },
+      fetch: FetchStatus.Fetching,
+    });
+  });
+});
 
 function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
   route.fetch = FetchStatus.Fetching;
-  fetchRouteRealtime(stopPointId, route)
+  fetchRouteRealtime(route.stopPointDetails, route.lineDetails, route)
     .then((r) => {
       route.fetch = FetchStatus.Fetched;
 
@@ -46,7 +78,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
         }
       }, 1_000);
     })
-    .catch((_) => {
+    .catch((e) => {
       route.fetch = FetchStatus.Errored;
       realtimeRoutesSchedules.value[route.id] = { route };
     })

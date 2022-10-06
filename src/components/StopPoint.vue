@@ -115,7 +115,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
       :key="i"
       :class="[
         'mt-2',
-        'w-fit p-2',
+        'w-fit px-2 pt-2',
         realtimeRoutesSchedule.route.fetch === FetchStatus.Errored
           ? 'errored'
           : realtimeRoutesSchedule.route.fetch === FetchStatus.Fetching
@@ -126,7 +126,16 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
         'rounded-lg border-4 border-transparent',
       ]"
     >
-      {{ realtimeRoutesSchedule.route.line.id.includes("TBC") ? "🚌" : "🚋" }}
+      {{
+        realtimeRoutesSchedule.route.line.id.includes("TBC") ||
+        realtimeRoutesSchedule.route.line.id.includes("GIRONDE")
+          ? "🚌"
+          : realtimeRoutesSchedule.route.line.id.includes("TBT")
+          ? "🚋"
+          : realtimeRoutesSchedule.route.line.id.includes("SNC")
+          ? "🚆"
+          : ""
+      }}
       <h4 class="font-bold text-base py-1 inline">
         {{ realtimeRoutesSchedule.route.line.name }}
       </h4>
@@ -161,7 +170,18 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
               'inline',
             ]"
           >
-            {{ duration(realtimeRoutesScheduleData.waittime, true, true) }} ± 10s
+            {{ duration(realtimeRoutesScheduleData.waittime, true, true) }} ±
+            {{
+              realtimeRoutesScheduleData.vehicle_position_updated_at &&
+              realtimeRoutesScheduleData.vehicle_position_updated_at.length
+                ? duration(
+                    Date.now() -
+                      Date.parse(realtimeRoutesScheduleData.vehicle_position_updated_at.replace(" ", "T")),
+                    true,
+                    true,
+                  )
+                : "10s"
+            }}
           </p>
         </li>
       </ul>

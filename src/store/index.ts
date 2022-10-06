@@ -107,28 +107,25 @@ async function fetchRouteRealtime(stopPointId: string, route: Route): Promise<Ro
     : route.line.id.includes("TBT")
     ? route.line.name.match(/[A-Z]$/)![0]
     : null;
-  if (!vehicleCode) return null;
-  try {
-    const result = (
-      await instance.get(`get-realtime-pass/${stopPointId}/${vehicleCode}/${encodeURI(route.id)}`)
-    ).data as RouteRealtime<"RAW">;
-    return {
-      destinations: (Object.keys(result.destinations) as Array<keyof typeof result["destinations"]>).reduce(
-        (acc, val) => [
-          ...acc,
-          ...result.destinations[val].map((rri) => ({
-            ...rri,
-            waittime: rri.waittime
-              .match(/\d{2}/g)!
-              .reduce((acc, val, i) => acc + parseInt(val) * 60 ** (2 - i) * 1000, 0),
-          })),
-        ],
-        [] as RouteRealtimeInfos<"TREATED">[],
-      ),
-    };
-  } catch (_) {
-    return null;
-  }
+  if (!vehicleCode) throw new Error("Transport non implémenté");
+
+  const result = (
+    await instance.get(`get-realtime-pass/${stopPointId}/${vehicleCode}/${encodeURI(route.id)}`)
+  ).data as RouteRealtime<"RAW">;
+  return {
+    destinations: (Object.keys(result.destinations) as Array<keyof typeof result["destinations"]>).reduce(
+      (acc, val) => [
+        ...acc,
+        ...result.destinations[val].map((rri) => ({
+          ...rri,
+          waittime: rri.waittime
+            .match(/\d{2}/g)!
+            .reduce((acc, val, i) => acc + parseInt(val) * 60 ** (2 - i) * 1000, 0),
+        })),
+      ],
+      [] as RouteRealtimeInfos<"TREATED">[],
+    ),
+  };
 }
 
 /**

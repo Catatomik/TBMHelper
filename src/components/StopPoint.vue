@@ -139,7 +139,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
           !('destinations' in realtimeRoutesSchedule) ||
           !Object.keys(realtimeRoutesSchedule.destinations).length
         "
-        class="inline"
+        class="mx-3"
       >
         ∅
       </p>

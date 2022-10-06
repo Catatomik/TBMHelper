@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import router from "@/router";
 import {
-  fetchStopDetails,
+  fetchStopAreaDetails,
   fetchStops,
   type FullyDescribedStop,
   type StopArea,
@@ -35,7 +35,7 @@ async function queryUpdated(to = route) {
       router.push({ query });
       continue;
     }
-    const fullyDescribedStop = await fetchStopDetails(found);
+    const fullyDescribedStop = await fetchStopAreaDetails(found);
     if (!fullyDescribedStop) {
       delete query[k];
       queryInternallyUpdated = true;
@@ -62,7 +62,7 @@ async function refreshStops() {
 async function addCurrentStop() {
   const found = stops.value.find((s) => s.name === stopInput.value);
   if (!found) return false; // display error
-  const fullyDescribedStop = await fetchStopDetails(found);
+  const fullyDescribedStop = await fetchStopAreaDetails(found);
   if (!fullyDescribedStop) return false; // display error
 
   query[Object.keys(query).length + 1] = fullyDescribedStop.name;

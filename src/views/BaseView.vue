@@ -77,19 +77,19 @@ async function addCurrentStop() {
 }
 
 function removeStop(stop: FullyDescribedStop) {
-  selectedStops.value = selectedStops.value.filter(s => s.id != stop.id);
-  
+  selectedStops.value = selectedStops.value.filter((s) => s.id != stop.id);
+
   let queryNeedUpdate = false;
-  Object.keys(query).forEach(k => {
-    if (query[k] === stop.name)  {
+  Object.keys(query).forEach((k) => {
+    if (query[k] === stop.name) {
       queryNeedUpdate = true;
-      delete query[k]
-  }
-  if (queryNeedUpdate) {
-    queryInternallyUpdated = true;
-    router.push({ query });
-  }
-  })
+      delete query[k];
+    }
+    if (queryNeedUpdate) {
+      queryInternallyUpdated = true;
+      router.push({ query });
+    }
+  });
 }
 </script>
 
@@ -118,7 +118,11 @@ function removeStop(stop: FullyDescribedStop) {
           :key="stopPoint.id"
           :stop-point="stopPoint"
           @delete="
-            removeStop(selectedStops.find(s => s.details.stopPoints.find(sp => sp.id === stopPoint.id)) as FullyDescribedStop);
+            removeStop(
+              selectedStops.find((s) =>
+                s.details.stopPoints.find((sp) => sp.id === stopPoint.id),
+              ) as FullyDescribedStop,
+            )
           "
         />
       </div>

@@ -49,6 +49,8 @@ fetchStopPointDetails(props.stopPoint.routes[0], props.stopPoint).then((stopPoin
         : {
             externalCode: route.line.id.includes("TBT")
               ? route.line.name.match(/[A-Z]$/)![0]
+              : route.line.id.includes("TBC") // TransGironde
+              ? route.line.id.match(/\d{2}$/)![0]
               : route.line.id.includes("GIRONDE") // TransGironde
               ? route.line.id.match(/[A-Z]+:Line:\d+(_R)?$/)![0]
               : route.line.id.includes("SNC") // SNCF

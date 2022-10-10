@@ -57,10 +57,33 @@ type FullyDescribedStop = StopArea & { details: StopAreaDetails };
 
 async function fetchStopAreaDetails(stop: StopArea): Promise<FullyDescribedStop | null> {
   try {
+    const details = (await instance.get(`network/stoparea-informations/${encodeURI(stop.id)}`))
+      .data as StopAreaDetails;
+    if (!details) return null;
+    details.stopPoints = details.stopPoints.filter((sp, _, arr) =>
+      sp.routes.some(
+        // if at least one route in this stop point doesn't have a satisfying sibling in another stop point of this stop area
+        (r) =>
+          !arr.find(
+            (sp2) =>
+              sp.id != sp2.id &&
+              sp2.routes.find((r2) => r2.id === r.id) &&
+              sp2.routes.length > sp.routes.length,
+          ),
+      ),
+    );
+    details.stopPoints.forEach(
+      (sp, _, arr) =>
+        (sp.routes = sp.routes.filter(
+          (r) =>
+            !arr.find((sp2) =>
+              sp2.routes.find((r2) => sp.routes.length > sp2.routes.length && r2.id === r.id),
+            ),
+        )),
+    );
     return {
       ...stop,
-      details: (await instance.get(`network/stoparea-informations/${encodeURI(stop.id)}`))
-        .data as StopAreaDetails,
+      details,
     };
   } catch (_) {
     return null;

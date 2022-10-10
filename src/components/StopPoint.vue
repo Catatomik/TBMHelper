@@ -43,7 +43,9 @@ fetchStopPointDetails(props.stopPoint.routes[0], props.stopPoint).then((stopPoin
       ...route,
       stopPointDetails,
       lineDetails: lineDetails.length
-        ? lineDetails[0]
+        ? route.line.id.includes("TBT")
+          ? { ...lineDetails[0], externalCode: route.line.name.match(/[A-Z]$/)![0] }
+          : lineDetails[0]
         : {
             externalCode: route.line.id.includes("TBT")
               ? route.line.name.match(/[A-Z]$/)![0]

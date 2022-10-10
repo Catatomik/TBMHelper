@@ -183,6 +183,11 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
                 : "10s"
             }}
           </p>
+          <p class="inline ml-2">
+            {{
+              realtimeRoutesSchedule.route.stopPointDetails.schedules.destinations.length > 1 ? realtimeRoutesScheduleData.destination_name.replace(/\./g, ' ') : ''
+            }}
+          </p>
         </li>
       </ul>
     </div>

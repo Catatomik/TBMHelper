@@ -126,6 +126,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
         'rounded-lg border-4 border-transparent',
       ]"
     >
+      <img v-if="'id' in realtimeRoutesSchedule.route.lineDetails" width="25" class="inline" :src="realtimeRoutesSchedule.route.lineDetails.picto">
       {{
         realtimeRoutesSchedule.route.line.id.includes("TBC") ||
         realtimeRoutesSchedule.route.line.id.includes("GIRONDE")

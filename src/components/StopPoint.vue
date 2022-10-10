@@ -126,21 +126,28 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
         'rounded-lg border-4 border-transparent',
       ]"
     >
-      <img v-if="'id' in realtimeRoutesSchedule.route.lineDetails" width="25" class="inline" :src="realtimeRoutesSchedule.route.lineDetails.picto">
-      {{
-        realtimeRoutesSchedule.route.line.id.includes("TBC") ||
-        realtimeRoutesSchedule.route.line.id.includes("GIRONDE")
-          ? "🚌"
-          : realtimeRoutesSchedule.route.line.id.includes("TBT")
-          ? "🚋"
-          : realtimeRoutesSchedule.route.line.id.includes("SNC")
-          ? "🚆"
-          : ""
-      }}
-      <h4 class="font-bold text-base py-1 inline">
+      <img
+        v-if="'id' in realtimeRoutesSchedule.route.lineDetails"
+        width="25"
+        class="inline align-middle"
+        :src="realtimeRoutesSchedule.route.lineDetails.picto"
+      />
+      <p class="mx-1 inline align-middle">
+        {{
+          realtimeRoutesSchedule.route.line.id.includes("TBC") ||
+          realtimeRoutesSchedule.route.line.id.includes("GIRONDE")
+            ? "🚌"
+            : realtimeRoutesSchedule.route.line.id.includes("TBT")
+            ? "🚋"
+            : realtimeRoutesSchedule.route.line.id.includes("SNC")
+            ? "🚆"
+            : ""
+        }}
+      </p>
+      <h4 class="font-bold text-base py-1 inline align-middle">
         {{ realtimeRoutesSchedule.route.line.name }}
       </h4>
-      ➜ {{ realtimeRoutesSchedule.route.name }}
+      <p class="inline align-middle">➜ {{ realtimeRoutesSchedule.route.name }}</p>
       <p v-if="realtimeRoutesSchedule.route.fetch === FetchStatus.Errored" class="text-red-700">
         Erreur lors de la récupération des horaires
       </p>
@@ -186,7 +193,9 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
           </p>
           <p class="inline ml-2">
             {{
-              realtimeRoutesSchedule.route.stopPointDetails.schedules.destinations.length > 1 ? realtimeRoutesScheduleData.destination_name.replace(/\./g, ' ') : ''
+              realtimeRoutesSchedule.route.stopPointDetails.schedules.destinations.length > 1
+                ? realtimeRoutesScheduleData.destination_name.replace(/\./g, " ")
+                : ""
             }}
           </p>
         </li>

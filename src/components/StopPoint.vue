@@ -151,7 +151,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
       <h4 class="font-bold text-base py-1 inline align-middle">
         {{ realtimeRoutesSchedule.route.line.name }}
       </h4>
-      <p class="inline align-middle">➜ {{ realtimeRoutesSchedule.route.name }}</p>
+      <p class="inline align-middle ml-1">➜ {{ realtimeRoutesSchedule.route.name }}</p>
       <p v-if="realtimeRoutesSchedule.route.fetch === FetchStatus.Errored" class="text-red-700">
         Erreur lors de la récupération des horaires
       </p>
@@ -198,7 +198,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
           <p class="inline ml-2">
             {{
               realtimeRoutesSchedule.route.stopPointDetails.schedules.destinations.length > 1
-                ? realtimeRoutesScheduleData.destination_name.replace(/\./g, " ")
+                ? `➜ ${realtimeRoutesScheduleData.destination_name.replace(/\./g, " ")}`
                 : ""
             }}
           </p>

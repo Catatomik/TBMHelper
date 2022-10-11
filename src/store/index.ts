@@ -225,9 +225,9 @@ async function fetchRouteRealtime(
 }
 
 /**
- * @param {Number} ms Une durée en secondes
- * @param {Boolean} includeSec Un booléen indiquant s'il faut inclure les secondes
- * @returns {String} La durée formatée (YY?, MoMo?, DD?, HH?, MiMi?, SS? )
+ * @param ms Une durée en secondes
+ * @param includeSec Un booléen indiquant s'il faut inclure les secondes
+ * @returns La durée formatée (YY?, MoMo?, DD?, HH?, MiMi?, SS? )
  */
 function duration(ms: number, includeSec = true, short = false): string {
   ms = Math.sqrt(ms ** 2); //ensure positive value

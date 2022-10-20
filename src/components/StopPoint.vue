@@ -82,7 +82,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
         }
       }, 1_000);
     })
-    .catch((e) => {
+    .catch((_) => {
       route.fetch = FetchStatus.Errored;
       realtimeRoutesSchedules.value[route.id] = { route };
     })

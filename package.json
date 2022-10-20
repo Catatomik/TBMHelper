@@ -8,7 +8,7 @@
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
-    "prettier": "npx prettier \"**/*.{js,ts,vue}\" --write"
+    "prettier": "npx prettier \"**/*.{js,ts,vue,html}\" --write"
   },
   "dependencies": {
     "autoprefixer": "^10.4.12",

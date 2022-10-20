@@ -18,14 +18,26 @@ let queryInternallyUpdated = false;
 onMounted(queryUpdated);
 onBeforeRouteUpdate((to) => queryUpdated(to));
 
+const selectedStops = ref<FullyDescribedStop[]>([]);
+
 async function queryUpdated(to = route) {
   if (queryInternallyUpdated) {
     queryInternallyUpdated = false;
     return;
   }
   query = { ...to.query };
-  for (const k of Object.keys(to.query).filter(k => !isNaN(parseInt(k))).sort((a, b) => parseInt(a) - parseInt(b))) {
 
+  const excludedStopPoints = (
+    to.query["excludedStopPoints"] === undefined
+      ? []
+      : to.query["excludedStopPoints"] instanceof Array
+      ? to.query["excludedStopPoints"]
+      : [to.query["excludedStopPoints"]]
+  ) as StopPoint["id"][];
+
+  for (const k of Object.keys(to.query)
+    .filter((k) => !isNaN(parseInt(k)))
+    .sort((a, b) => parseInt(a) - parseInt(b))) {
     const providenStop = to.query[k] as string;
 
     if (selectedStops.value.find((s) => s.name === providenStop)) continue;
@@ -43,6 +55,9 @@ async function queryUpdated(to = route) {
       router.push({ query });
       continue;
     }
+    fullyDescribedStop.details.stopPoints = fullyDescribedStop.details.stopPoints?.filter(
+      (s) => !excludedStopPoints.includes(s.id),
+    );
     selectedStops.value = [...selectedStops.value, fullyDescribedStop];
   }
 
@@ -52,7 +67,6 @@ async function queryUpdated(to = route) {
 
 const stopInput = ref<string>("");
 const stops = ref<StopArea[]>([]);
-const selectedStops = ref<FullyDescribedStop[]>([]);
 
 async function refreshStops() {
   if (await addCurrentStop()) return;
@@ -98,10 +112,15 @@ function removeStop(stop: FullyDescribedStop) {
   <main>
     <div class="flex flex-col">
       <div class="flex justify-center">
-        <input class="my-3 p-1 w-2/3 border-2 border-slate-500 rounded-md shadow-md" type="text"
-          placeholder="Chercher un arrêt..." list="selectedStops" :value="stopInput"
+        <input
+          class="my-3 p-1 w-2/3 border-2 border-slate-500 rounded-md shadow-md"
+          type="text"
+          placeholder="Chercher un arrêt..."
+          list="selectedStops"
+          :value="stopInput"
           @input="(stopInput = ($event.target as HTMLInputElement).value), refreshStops()"
-          @keyup.enter="addCurrentStop()" />
+          @keyup.enter="addCurrentStop()"
+        />
 
         <datalist id="selectedStops">
           <option v-for="stop in stops" :key="stop.id" :value="stop.name" />
@@ -111,13 +130,16 @@ function removeStop(stop: FullyDescribedStop) {
       <div v-else class="my-5 mx-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <StopPointComp
           v-for="stopPoint in selectedStops.reduce((acc, val) => [...acc, ...val.details.stopPoints], [] as StopPoint[])"
-          :key="stopPoint.id" :stop-point="stopPoint" @delete="
+          :key="stopPoint.id"
+          :stop-point="stopPoint"
+          @delete="
             removeStop(
               selectedStops.find((s) =>
                 s.details.stopPoints.find((sp) => sp.id === stopPoint.id),
               ) as FullyDescribedStop,
             )
-          " />
+          "
+        />
       </div>
     </div>
   </main>

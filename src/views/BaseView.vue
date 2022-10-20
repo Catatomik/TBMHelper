@@ -129,7 +129,9 @@ function removeStopPoint(stopArea: StopArea, stopPoint: StopPoint) {
           <option v-for="stop in stops" :key="stop.id" :value="stop.name" />
         </datalist>
       </div>
-      <h3 v-if="!selectedStops.length" class="mt-5 text-center font-bold text-lg">Aucun arrêt sélectionné</h3>
+      <h3
+        v-if="!selectedStops.reduce((acc, val) => [...acc, ...val.details.stopPoints.filter(sp => !excludedStopPoints.includes(`${val.id}-${sp.id}`))], [] as StopPoint[]).length"
+        class="mt-5 text-center font-bold text-lg">Aucun arrêt sélectionné</h3>
       <div v-else class="my-5 mx-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <StopPointComp
           v-for="stopPoint in selectedStops.reduce((acc, val) => [...acc, ...val.details.stopPoints.filter(sp => !excludedStopPoints.includes(`${val.id}-${sp.id}`))], [] as StopPoint[])"

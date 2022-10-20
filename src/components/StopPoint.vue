@@ -18,7 +18,8 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: "delete"): void;
+  (e: "softDelete"): void;
+  (e: "hardDelete"): void;
 }>();
 
 enum FetchStatus {
@@ -98,7 +99,16 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
   <div class="rounded-lg p-3 shadow-xl">
     <div class="flex justify-center items-center">
       <h3 class="text-center font-bold text-lg">📍 {{ stopPoint.name }}</h3>
-      <button class="ml-2 border-4 rounded-lg border-red-500 text-center select-none" @click="emit('delete')">
+      <button
+        class="ml-2 border-4 rounded-lg border-orange-400 text-center select-none"
+        @click="emit('softDelete')"
+      >
+        ❌
+      </button>
+      <button
+        class="ml-2 border-4 rounded-lg border-red-500 text-center select-none"
+        @click="emit('hardDelete')"
+      >
         ❌
       </button>
     </div>

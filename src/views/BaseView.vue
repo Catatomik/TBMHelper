@@ -19,6 +19,7 @@ onMounted(queryUpdated);
 onBeforeRouteUpdate((to) => queryUpdated(to));
 
 const selectedStops = ref<FullyDescribedStop[]>([]);
+const excludedStopPoints = ref<`${StopArea["id"]}-${StopPoint["id"]}`[]>([]);
 
 async function queryUpdated(to = route) {
   if (queryInternallyUpdated) {
@@ -27,13 +28,13 @@ async function queryUpdated(to = route) {
   }
   query = { ...to.query };
 
-  const excludedStopPoints = (
+  excludedStopPoints.value = (
     to.query["excludedStopPoints"] === undefined
       ? []
       : to.query["excludedStopPoints"] instanceof Array
       ? to.query["excludedStopPoints"]
       : [to.query["excludedStopPoints"]]
-  ) as StopPoint["id"][];
+  ) as `${StopArea["id"]}-${StopPoint["id"]}`[];
 
   for (const k of Object.keys(to.query)
     .filter((k) => !isNaN(parseInt(k)))
@@ -55,9 +56,6 @@ async function queryUpdated(to = route) {
       router.push({ query });
       continue;
     }
-    fullyDescribedStop.details.stopPoints = fullyDescribedStop.details.stopPoints?.filter(
-      (s) => !excludedStopPoints.includes(s.id),
-    );
     selectedStops.value = [...selectedStops.value, fullyDescribedStop];
   }
 
@@ -106,6 +104,16 @@ function removeStop(stop: FullyDescribedStop) {
     }
   });
 }
+
+function removeStopPoint(stopArea: StopArea, stopPoint: StopPoint) {
+  if (excludedStopPoints.value.includes(`${stopArea.id}-${stopPoint.id}`)) return;
+
+  excludedStopPoints.value.push(`${stopArea.id}-${stopPoint.id}`);
+
+  query["excludedStopPoints"] = excludedStopPoints.value;
+  queryInternallyUpdated = true;
+  router.push({ query });
+}
 </script>
 
 <template>
@@ -129,10 +137,18 @@ function removeStop(stop: FullyDescribedStop) {
       <h3 v-if="!selectedStops.length" class="mt-5 text-center font-bold text-lg">Aucun arrêt sélectionné</h3>
       <div v-else class="my-5 mx-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <StopPointComp
-          v-for="stopPoint in selectedStops.reduce((acc, val) => [...acc, ...val.details.stopPoints], [] as StopPoint[])"
+          v-for="stopPoint in selectedStops.reduce((acc, val) => [...acc, ...val.details.stopPoints.filter(sp => !excludedStopPoints.includes(`${val.id}-${sp.id}`))], [] as StopPoint[])"
           :key="stopPoint.id"
           :stop-point="stopPoint"
-          @delete="
+          @soft-delete="
+            removeStopPoint(
+              selectedStops.find((s) =>
+                s.details.stopPoints.find((sp) => sp.id === stopPoint.id),
+              ) as FullyDescribedStop,
+              stopPoint,
+            )
+          "
+          @hard-delete="
             removeStop(
               selectedStops.find((s) =>
                 s.details.stopPoints.find((sp) => sp.id === stopPoint.id),

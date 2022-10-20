@@ -213,6 +213,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
   from {
     border-color: rgba(220, 38, 38, 1);
   }
+
   to {
     border-color: rgba(220, 38, 38, 0);
   }
@@ -226,6 +227,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
   from {
     border-color: rgba(251, 146, 60, 1);
   }
+
   to {
     border-color: rgba(251, 146, 60, 0);
   }
@@ -239,6 +241,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
   from {
     border-color: rgba(52, 211, 153, 1);
   }
+
   to {
     border-color: rgba(52, 211, 153, 0);
   }

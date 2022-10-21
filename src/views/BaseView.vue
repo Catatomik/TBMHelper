@@ -113,7 +113,7 @@ function removeStop(stopArea: FullyDescribedStopArea) {
   }
 }
 
-function removeStopPoint(stopArea: StopArea, stopPoint: StopPoint) {
+function removeStopPoint(stopArea: FullyDescribedStopArea, stopPoint: StopPoint) {
   if (
     excludedStopPoints.value.find(
       ([stopAreaId, stopPointId]) => stopArea.id === stopAreaId && stopPoint.id === stopPointId,
@@ -127,6 +127,13 @@ function removeStopPoint(stopArea: StopArea, stopPoint: StopPoint) {
   if (!query["eSP"].length) delete query["eSP"];
   queryInternallyUpdated = true;
   router.push({ query });
+
+  if (
+    stopArea.details.stopPoints.every((s) =>
+      excludedStopPoints.value.find(([_, stopPointId]) => s.id === stopPointId),
+    )
+  )
+    removeStop(stopArea);
 }
 
 function deserializeExcludedStopPoints(serializedExcludedStopPoints: string) {

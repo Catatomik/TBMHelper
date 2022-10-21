@@ -53,9 +53,9 @@ interface StopAreaDetails {
   stopPoints: StopPoint[];
 }
 
-type FullyDescribedStop = StopArea & { details: StopAreaDetails };
+type FullyDescribedStopArea = StopArea & { details: StopAreaDetails };
 
-async function fetchStopAreaDetails(stop: StopArea): Promise<FullyDescribedStop | null> {
+async function fetchStopAreaDetails(stop: StopArea): Promise<FullyDescribedStopArea | null> {
   try {
     const details = (await instance.get(`network/stoparea-informations/${encodeURI(stop.id)}`))
       .data as StopAreaDetails;
@@ -256,6 +256,13 @@ function duration(ms: number, includeSec = true, short = false): string {
   }${s > 0 && includeSec ? `${s}${short ? "s" : ` seconde${ss}`} ` : ""}`.replace(/ $/g, "");
 }
 
+/**
+ * @description Checks unicity of a value in an array
+ */
+function unique<T>(v: T, i: number, arr: T[]): boolean {
+  return arr.indexOf(v) === i;
+}
+
 export {
   fetchStops,
   fetchStopAreaDetails,
@@ -263,6 +270,15 @@ export {
   fetchLineDetails,
   fetchRouteRealtime,
   duration,
+  unique,
 };
 
-export type { StopArea, StopPoint, StopPointDetails, LineDetails, Route, FullyDescribedStop, RouteRealtime };
+export type {
+  StopArea,
+  StopPoint,
+  StopPointDetails,
+  LineDetails,
+  Route,
+  FullyDescribedStopArea,
+  RouteRealtime,
+};

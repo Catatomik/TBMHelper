@@ -3,7 +3,8 @@ import router from "@/router";
 import {
   fetchStopAreaDetails,
   fetchStops,
-  type FullyDescribedStop,
+  unique,
+  type FullyDescribedStopArea,
   type StopArea,
   type StopPoint,
 } from "@/store";
@@ -18,8 +19,8 @@ let queryInternallyUpdated = false;
 onMounted(queryUpdated);
 onBeforeRouteUpdate((to) => queryUpdated(to));
 
-const selectedStops = ref<FullyDescribedStop[]>([]);
-const excludedStopPoints = ref<`${StopArea["id"]}-${StopPoint["id"]}`[]>([]);
+const selectedStops = ref<FullyDescribedStopArea[]>([]);
+const excludedStopPoints = ref<[StopArea["id"], StopPoint["id"]][]>([]);
 
 async function queryUpdated(to = route) {
   if (queryInternallyUpdated) {
@@ -27,14 +28,6 @@ async function queryUpdated(to = route) {
     return;
   }
   query = { ...to.query };
-
-  excludedStopPoints.value = (
-    to.query["excludedStopPoints"] === undefined
-      ? []
-      : to.query["excludedStopPoints"] instanceof Array
-      ? to.query["excludedStopPoints"]
-      : [to.query["excludedStopPoints"]]
-  ) as `${StopArea["id"]}-${StopPoint["id"]}`[];
 
   for (const k of Object.keys(to.query)
     .filter((k) => !isNaN(parseInt(k)))
@@ -61,6 +54,10 @@ async function queryUpdated(to = route) {
 
   const providenStops = Object.keys(query).map((k) => query[k]);
   selectedStops.value = selectedStops.value.filter((s) => providenStops.includes(s.name));
+
+  excludedStopPoints.value = deserializeExcludedStopPoints(
+    typeof query["eSP"] === "string" ? query["eSP"] : "",
+  );
 }
 
 const stopInput = ref<string>("");
@@ -89,19 +86,20 @@ async function addCurrentStop() {
   return true;
 }
 
-function removeStop(stop: FullyDescribedStop) {
-  selectedStops.value = selectedStops.value.filter((s) => s.id != stop.id);
+function removeStop(stopArea: FullyDescribedStopArea) {
+  selectedStops.value = selectedStops.value.filter((s) => s.id != stopArea.id);
 
   let queryNeedUpdate = false;
 
-  if (excludedStopPoints.value.find((s) => s.startsWith(stop.id))) {
+  if (excludedStopPoints.value.find(([stopAreaId]) => stopAreaId === stopArea.id)) {
     queryNeedUpdate = true;
-    excludedStopPoints.value = excludedStopPoints.value.filter((s) => !s.startsWith(stop.id));
-    query["excludedStopPoints"] = excludedStopPoints.value;
+    excludedStopPoints.value = excludedStopPoints.value.filter(([stopAreaId]) => stopAreaId !== stopArea.id);
+    query["eSP"] = serializeExcludedStopPoints(excludedStopPoints.value);
+    if (!query["eSP"].length) delete query["eSP"];
   }
 
   Object.keys(query).forEach((k) => {
-    if (query[k] === stop.name) {
+    if (query[k] === stopArea.name) {
       queryNeedUpdate = true;
       delete query[k];
     }
@@ -114,13 +112,84 @@ function removeStop(stop: FullyDescribedStop) {
 }
 
 function removeStopPoint(stopArea: StopArea, stopPoint: StopPoint) {
-  if (excludedStopPoints.value.includes(`${stopArea.id}-${stopPoint.id}`)) return;
+  if (
+    excludedStopPoints.value.find(
+      ([stopAreaId, stopPointId]) => stopArea.id === stopAreaId && stopPoint.id === stopPointId,
+    )
+  )
+    return;
 
-  excludedStopPoints.value.push(`${stopArea.id}-${stopPoint.id}`);
+  excludedStopPoints.value.push([stopArea.id, stopPoint.id]);
 
-  query["excludedStopPoints"] = excludedStopPoints.value;
+  query["eSP"] = serializeExcludedStopPoints(excludedStopPoints.value);
+  if (!query["eSP"].length) delete query["eSP"];
   queryInternallyUpdated = true;
   router.push({ query });
+}
+
+function deserializeExcludedStopPoints(serializedExcludedStopPoints: string) {
+  const stopAreas = serializedExcludedStopPoints.split(",");
+  if (!stopAreas.length) return [];
+
+  const excludedStopPoints = [] as [StopArea["id"], StopPoint["id"]][];
+
+  for (const stopAreaString of stopAreas) {
+    const stopAreaNumber = stopAreaString.match(/^\d+/)?.[0];
+    if (stopAreaNumber === undefined) continue;
+
+    const stopAreaName = query[stopAreaNumber];
+    if (!stopAreaName) continue;
+
+    const stopArea = selectedStops.value.find((s) => s.name === stopAreaName);
+    if (!stopArea) continue;
+
+    const stopPoints = stopAreaString.split("-");
+
+    for (let i = 1; i < stopPoints.length; i++) {
+      const stopPoint = stopArea.details.stopPoints.find((s) => s.id.endsWith(stopPoints[i]));
+      if (!stopPoint) continue;
+
+      excludedStopPoints.push([stopArea.id, stopPoint.id]);
+    }
+  }
+
+  return excludedStopPoints;
+}
+
+function serializeExcludedStopPoints(excludedStopPoints: [StopArea["id"], StopPoint["id"]][]) {
+  const partialExcludedStopPoints = [] as string[];
+
+  for (const stopAreaId of excludedStopPoints.map(([stopArea]) => stopArea).filter(unique)) {
+    const stopArea = selectedStops.value.find((s) => s.id === stopAreaId);
+    if (!stopArea) continue;
+
+    const stopAreaNumber = Object.keys(query).find((k) => query[k] === stopArea.name);
+    if (stopAreaNumber === undefined) continue;
+
+    partialExcludedStopPoints.push(
+      `${stopAreaNumber}-${excludedStopPoints
+        .filter(([stopArea]) => stopArea === stopAreaId)
+        .map(([_, stopPointId]) => stopPointId.substring("stop_point:".length))
+        .join("-")}`,
+    );
+  }
+
+  return partialExcludedStopPoints.join(",");
+}
+
+function getWantedStops(stops: typeof selectedStops.value) {
+  return stops.reduce(
+    (acc, val) => [
+      ...acc,
+      ...val.details.stopPoints.filter(
+        (sp) =>
+          !excludedStopPoints.value.find(
+            ([stopAreaId, stopPointId]) => val.id === stopAreaId && sp.id === stopPointId,
+          ),
+      ),
+    ],
+    [] as StopPoint[],
+  );
 }
 </script>
 
@@ -128,47 +197,34 @@ function removeStopPoint(stopArea: StopArea, stopPoint: StopPoint) {
   <main>
     <div class="flex flex-col">
       <div class="flex justify-center">
-        <input
-          class="my-3 p-1 w-2/3 border-2 border-slate-500 rounded-md shadow-md"
-          type="text"
-          placeholder="Chercher un arrêt..."
-          list="selectedStops"
-          :value="stopInput"
+        <input class="my-3 p-1 w-2/3 border-2 border-slate-500 rounded-md shadow-md" type="text"
+          placeholder="Chercher un arrêt..." list="selectedStops" :value="stopInput"
           @input="(stopInput = ($event.target as HTMLInputElement).value), refreshStops()"
-          @keyup.enter="addCurrentStop()"
-        />
+          @keyup.enter="addCurrentStop()" />
 
         <datalist id="selectedStops">
-          <option v-for="stop in stops" :key="stop.id" :value="stop.name" />
+          <option v-for="stop of stops" :key="stop.id" :value="stop.name" />
         </datalist>
       </div>
-      <h3
-        v-if="!selectedStops.reduce((acc, val) => [...acc, ...val.details.stopPoints.filter(sp => !excludedStopPoints.includes(`${val.id}-${sp.id}`))], [] as StopPoint[]).length"
-        class="mt-5 text-center font-bold text-lg"
-      >
+      <h3 v-if="!getWantedStops(selectedStops).length" class="mt-5 text-center font-bold text-lg">
         Aucun arrêt sélectionné
       </h3>
       <div v-else class="my-5 mx-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <StopPointComp
-          v-for="stopPoint in selectedStops.reduce((acc, val) => [...acc, ...val.details.stopPoints.filter(sp => !excludedStopPoints.includes(`${val.id}-${sp.id}`))], [] as StopPoint[])"
-          :key="stopPoint.id"
-          :stop-point="stopPoint"
+        <StopPointComp v-for="stopPoint of getWantedStops(selectedStops)" :key="stopPoint.id" :stop-point="stopPoint"
           @soft-delete="
             removeStopPoint(
               selectedStops.find((s) =>
                 s.details.stopPoints.find((sp) => sp.id === stopPoint.id),
-              ) as FullyDescribedStop,
+              ) as FullyDescribedStopArea,
               stopPoint,
             )
-          "
-          @hard-delete="
+          " @hard-delete="
             removeStop(
               selectedStops.find((s) =>
                 s.details.stopPoints.find((sp) => sp.id === stopPoint.id),
-              ) as FullyDescribedStop,
+              ) as FullyDescribedStopArea,
             )
-          "
-        />
+          " />
       </div>
     </div>
   </main>

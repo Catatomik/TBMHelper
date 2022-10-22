@@ -1,4 +1,6 @@
 [![Node.js CI](https://github.com/Catatomik/TBMHelper/actions/workflows/node.js.yml/badge.svg)](https://github.com/Catatomik/TBMHelper/actions/workflows/node.js.yml)
+[![Known Vulnerabilities](https://snyk.io/test/github/Catatomik/TBMHelper/badge.svg)](https://snyk.io/test/github/Catatomik/TBMHelper)
+[![Maintainability](https://api.codeclimate.com/v1/badges/da71111397f8a7dfd23f/maintainability)](https://codeclimate.com/github/Catatomik/TBMHelper/maintainability)
 # TBMHelper
 
 This template should help get you started developing with Vue 3 in Vite.

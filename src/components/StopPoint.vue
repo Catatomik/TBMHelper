@@ -48,16 +48,16 @@ fetchStopPointDetails(props.stopPoint.routes[0], props.stopPoint).then((stopPoin
           ? { ...lineDetails[0], externalCode: route.line.name.match(/[A-Z]$/)![0] }
           : lineDetails[0]
         : {
-            externalCode: route.line.id.includes("TBT")
-              ? route.line.name.match(/[A-Z]$/)![0]
-              : route.line.id.includes("TBC") // TransGironde
+          externalCode: route.line.id.includes("TBT")
+            ? route.line.name.match(/[A-Z]$/)![0]
+            : route.line.id.includes("TBC") // TransGironde
               ? route.line.id.match(/\d{2}$/)![0]
               : route.line.id.includes("GIRONDE") // TransGironde
-              ? route.line.id.match(/[A-Z]+:Line:\d+(_R)?$/)![0]
-              : route.line.id.includes("SNC") // SNCF
-              ? route.line.id.match(/[A-Z]+-[0-9]+$/)![0]
-              : "Will be errored if reached",
-          },
+                ? route.line.id.match(/[A-Z]+:Line:\d+(_R)?$/)![0]
+                : route.line.id.includes("SNC") // SNCF
+                  ? route.line.id.match(/[A-Z]+-[0-9]+$/)![0]
+                  : "Will be errored if reached",
+        },
       fetch: FetchStatus.Fetching,
     });
   });
@@ -99,73 +99,53 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
   <div class="rounded-lg p-3 shadow-xl">
     <div class="flex justify-center items-center">
       <h3 class="text-center font-bold text-lg">📍 {{ stopPoint.name }}</h3>
-      <button
-        class="ml-2 border-4 rounded-lg border-orange-400 text-center select-none"
-        @click="emit('softDelete')"
-      >
+      <button class="ml-2 border-4 rounded-lg border-orange-400 text-center select-none" @click="emit('softDelete')">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="w-4 h-4 fill-orange-400">
           <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
           <path
-            d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
-          />
+            d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z" />
         </svg>
       </button>
-      <button
-        class="ml-2 border-4 rounded-lg border-red-500 text-center select-none"
-        @click="emit('hardDelete')"
-      >
+      <button class="ml-2 border-4 rounded-lg border-red-500 text-center select-none" @click="emit('hardDelete')">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" class="w-4 h-4 fill-red-500">
           <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
           <path
-            d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z"
-          />
+            d="M310.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L160 210.7 54.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L114.7 256 9.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L160 301.3 265.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L205.3 256 310.6 150.6z" />
         </svg>
       </button>
     </div>
     <hr class="my-2" />
-    <p
-      v-if="
-        Object.values(realtimeRoutesSchedules).every(
-          (rrs) => !('destinations' in rrs) || rrs.route.fetch === FetchStatus.Errored,
-        )
-      "
-      class="text-red-700"
-    >
+    <p v-if="
+      Object.values(realtimeRoutesSchedules).every(
+        (rrs) => !('destinations' in rrs) || rrs.route.fetch === FetchStatus.Errored,
+      )
+    " class="text-red-700">
       Impossible de récupérer les horaires de cet arrêt
     </p>
-    <div
-      v-else
-      v-for="(realtimeRoutesSchedule, i) of realtimeRoutesSchedules"
-      :key="i"
-      :class="[
-        'mt-2',
-        'w-fit px-2 pt-2',
-        realtimeRoutesSchedule.route.fetch === FetchStatus.Errored
-          ? 'errored'
-          : realtimeRoutesSchedule.route.fetch === FetchStatus.Fetching
+    <div v-else v-for="(realtimeRoutesSchedule, i) of realtimeRoutesSchedules" :key="i" :class="[
+      'mt-2',
+      'w-fit px-2 pt-2',
+      realtimeRoutesSchedule.route.fetch === FetchStatus.Errored
+        ? 'errored'
+        : realtimeRoutesSchedule.route.fetch === FetchStatus.Fetching
           ? 'fetching'
           : realtimeRoutesSchedule.route.fetch === FetchStatus.Fetched
-          ? 'fetched'
-          : '',
-        'rounded-lg border-4 border-transparent',
-      ]"
-    >
-      <img
-        v-if="'id' in realtimeRoutesSchedule.route.lineDetails"
-        width="25"
-        class="inline align-middle"
-        :src="realtimeRoutesSchedule.route.lineDetails.picto"
-      />
+            ? 'fetched'
+            : '',
+      'rounded-lg border-4 border-transparent',
+    ]">
+      <img v-if="'id' in realtimeRoutesSchedule.route.lineDetails" width="25" class="inline align-middle"
+        :src="realtimeRoutesSchedule.route.lineDetails.picto" />
       <p class="mx-1 inline align-middle">
         {{
-          realtimeRoutesSchedule.route.line.id.includes("TBC") ||
-          realtimeRoutesSchedule.route.line.id.includes("GIRONDE")
-            ? "🚌"
-            : realtimeRoutesSchedule.route.line.id.includes("TBT")
-            ? "🚋"
-            : realtimeRoutesSchedule.route.line.id.includes("SNC")
-            ? "🚆"
-            : ""
+            realtimeRoutesSchedule.route.line.id.includes("TBC") ||
+              realtimeRoutesSchedule.route.line.id.includes("GIRONDE")
+              ? "🚌"
+              : realtimeRoutesSchedule.route.line.id.includes("TBT")
+                ? "🚋"
+                : realtimeRoutesSchedule.route.line.id.includes("SNC")
+                  ? "🚆"
+                  : ""
         }}
       </p>
       <h4 class="font-bold text-base py-1 inline align-middle">
@@ -175,68 +155,55 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
       <p v-if="realtimeRoutesSchedule.route.fetch === FetchStatus.Errored" class="text-red-700">
         Erreur lors de la récupération des horaires
       </p>
-      <p
-        v-else-if="
-          !('destinations' in realtimeRoutesSchedule) ||
-          !Object.keys(realtimeRoutesSchedule.destinations).length
-        "
-        class="mx-3"
-      >
+      <p v-else-if="
+        !('destinations' in realtimeRoutesSchedule) ||
+        !Object.keys(realtimeRoutesSchedule.destinations).length
+      " class="mx-3">
         ∅
       </p>
       <ul v-else>
-        <li
-          class="list-none mx-3 m-0"
-          v-for="realtimeRoutesScheduleData of realtimeRoutesSchedule.destinations"
-          :key="realtimeRoutesScheduleData.trip_id"
-        >
-          <img
-            v-if="parseInt(realtimeRoutesScheduleData.realtime) === 1"
-            src="realtime.gif"
-            alt="Temps réel"
-            class="blue inline w-4 mr-2 align-middle"
-          />
-          <svg
-            v-else
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 512 512"
-            class="blue inline w-4 mr-2 align-middle"
-          >
+        <li class="list-none mx-3 m-0" v-for="realtimeRoutesScheduleData of realtimeRoutesSchedule.destinations"
+          :key="realtimeRoutesScheduleData.trip_id">
+          <img v-if="parseInt(realtimeRoutesScheduleData.realtime) === 1" src="realtime.gif" alt="Temps réel"
+            class="blue inline w-4 mr-2 align-middle" />
+          <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+            class="blue inline w-4 mr-2 align-middle">
             <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
             <path
-              d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"
-            />
+              d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z" />
           </svg>
-          <p
-            :class="[
-              realtimeRoutesScheduleData.waittime < 3 * 60_000
-                ? 'text-red-500'
-                : realtimeRoutesScheduleData.waittime < 5 * 60_000
+          <p :class="[
+            realtimeRoutesScheduleData.waittime < 3 * 60_000
+              ? 'text-red-500'
+              : realtimeRoutesScheduleData.waittime < 5 * 60_000
                 ? 'text-orange-500'
                 : realtimeRoutesScheduleData.waittime < 10 * 60_000
-                ? 'text-emerald-500'
-                : '',
-              'inline',
-            ]"
-          >
-            {{ duration(realtimeRoutesScheduleData.waittime, true, true) }} ±
+                  ? 'text-emerald-500'
+                  : '',
+            'inline',
+          ]">
+            {{ duration(realtimeRoutesScheduleData.waittime, true, true) }}
+          <p class="inline italic">
+            ±
             {{
-              realtimeRoutesScheduleData.vehicle_position_updated_at &&
-              realtimeRoutesScheduleData.vehicle_position_updated_at.length
-                ? duration(
+                parseInt(realtimeRoutesScheduleData.realtime) === 1 &&
+                  realtimeRoutesScheduleData.vehicle_position_updated_at &&
+                  realtimeRoutesScheduleData.vehicle_position_updated_at.length
+                  ? duration(
                     Date.now() -
-                      Date.parse(realtimeRoutesScheduleData.vehicle_position_updated_at.replace(" ", "T")),
+                    Date.parse(realtimeRoutesScheduleData.vehicle_position_updated_at.replace(" ", "T")),
                     true,
                     true,
                   )
-                : "10s"
+                  : "10s"
             }}
+          </p>
           </p>
           <p class="inline ml-2">
             {{
-              realtimeRoutesSchedule.route.stopPointDetails.schedules.destinations.length > 1
-                ? `➜ ${realtimeRoutesScheduleData.destination_name.replace(/\./g, " ")}`
-                : ""
+    realtimeRoutesSchedule.route.stopPointDetails.schedules.destinations.length > 1
+      ? `➜ ${realtimeRoutesScheduleData.destination_name.replace(/\./g, " ")}`
+      : ""
             }}
           </p>
         </li>

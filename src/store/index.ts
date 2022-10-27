@@ -176,7 +176,7 @@ type RouteRealtimeInfos<T> = {
   destination_id: `${number}${number}${number}${number}`;
   destination_name: string;
   origin: string;
-  realtime: "1";
+  realtime: "0" | "1";
   schedule_id: string;
   trip_id: string;
   updated_at: StringifiedDateTime;

@@ -164,7 +164,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
       <ul v-else>
         <li class="list-none mx-3 m-0" v-for="realtimeRoutesScheduleData of realtimeRoutesSchedule.destinations"
           :key="realtimeRoutesScheduleData.trip_id">
-          <img v-if="parseInt(realtimeRoutesScheduleData.realtime) === 1" src="realtime.gif" alt="Temps réel"
+          <img v-if="parseInt(realtimeRoutesScheduleData.realtime) === 1" src="/realtime.gif" alt="Temps réel"
             class="blue inline w-4 mr-2 align-middle" />
           <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
             class="blue inline w-4 mr-2 align-middle">

@@ -216,7 +216,7 @@ function getWantedStops(stops: typeof selectedStops.value) {
     <div class="flex flex-col">
       <div class="flex justify-center">
         <input
-          class="my-3 p-1 w-2/3 border-[3px] border-slate-400 rounded-md shadow-md outline-none focus-visible:border-slate-800"
+          class="my-3 p-1 w-2/3 border-[3px] border-slate-400 rounded-md shadow-md outline-none focus-visible:border-slate-600"
           type="text"
           placeholder="Chercher un arrêt..."
           list="selectedStops"

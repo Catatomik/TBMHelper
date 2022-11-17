@@ -79,8 +79,7 @@ async function addCurrentStop() {
       queryInternallyUpdated = true;
       router.push({ query });
       return (stopInput.value = "");
-    }
-    else return (stopInput.value = ""); //display error
+    } else return (stopInput.value = ""); //display error
   }
   const found = stops.value.find((s) => s.name === stopInput.value);
   if (!found) return false; // display error
@@ -216,10 +215,15 @@ function getWantedStops(stops: typeof selectedStops.value) {
   <main>
     <div class="flex flex-col">
       <div class="flex justify-center">
-        <input class="my-3 p-1 w-2/3 border-2 border-slate-500 rounded-md shadow-md" type="text"
-          placeholder="Chercher un arrêt..." list="selectedStops" :value="stopInput"
+        <input
+          class="my-3 p-1 w-2/3 border-[3px] border-slate-400 rounded-md shadow-md outline-none focus-visible:border-slate-800"
+          type="text"
+          placeholder="Chercher un arrêt..."
+          list="selectedStops"
+          :value="stopInput"
           @input="(stopInput = ($event.target as HTMLInputElement).value), refreshStops()"
-          @keyup.enter="addCurrentStop()" />
+          @keyup.enter="addCurrentStop()"
+        />
 
         <datalist id="selectedStops">
           <option v-for="stop of stops" :key="stop.id" :value="stop.name" />
@@ -229,7 +233,10 @@ function getWantedStops(stops: typeof selectedStops.value) {
         Aucun arrêt sélectionné
       </h3>
       <div v-else class="my-5 mx-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <StopPointComp v-for="stopPoint of getWantedStops(selectedStops)" :key="stopPoint.id" :stop-point="stopPoint"
+        <StopPointComp
+          v-for="stopPoint of getWantedStops(selectedStops)"
+          :key="stopPoint.id"
+          :stop-point="stopPoint"
           @soft-delete="
             removeStopPoint(
               selectedStops.find((s) =>
@@ -237,13 +244,15 @@ function getWantedStops(stops: typeof selectedStops.value) {
               ) as FullyDescribedStopArea,
               stopPoint,
             )
-          " @hard-delete="
-  removeStop(
-    selectedStops.find((s) =>
-      s.details.stopPoints.find((sp) => sp.id === stopPoint.id),
-    ) as FullyDescribedStopArea,
-  )
-" />
+          "
+          @hard-delete="
+            removeStop(
+              selectedStops.find((s) =>
+                s.details.stopPoints.find((sp) => sp.id === stopPoint.id),
+              ) as FullyDescribedStopArea,
+            )
+          "
+        />
       </div>
     </div>
   </main>

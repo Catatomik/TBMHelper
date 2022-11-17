@@ -71,7 +71,16 @@ async function refreshStops() {
 
 async function addCurrentStop() {
   const alreadySelected = selectedStops.value.find((s) => s.name === stopInput.value);
-  if (alreadySelected) return (stopInput.value = ""); //display error
+  if (alreadySelected) {
+    if (excludedStopPoints.value.find(([sp]) => sp === alreadySelected.id)) {
+      excludedStopPoints.value = excludedStopPoints.value.filter(([sp]) => sp != alreadySelected.id);
+      query["eSP"] = serializeExcludedStopPoints(excludedStopPoints.value);
+      if (!query["eSP"].length) delete query["eSP"];
+      queryInternallyUpdated = true;
+      router.push({ query });
+    }
+    return (stopInput.value = ""); //display error
+  }
   const found = stops.value.find((s) => s.name === stopInput.value);
   if (!found) return false; // display error
   const fullyDescribedStop = await fetchStopAreaDetails(found);

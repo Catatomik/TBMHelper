@@ -263,6 +263,14 @@ function unique<T>(v: T, i: number, arr: T[]): boolean {
   return arr.indexOf(v) === i;
 }
 
+interface Settings {
+  uncertainty: boolean;
+}
+
+const defaultSettings: Settings = {
+  uncertainty: false,
+};
+
 export {
   fetchStops,
   fetchStopAreaDetails,
@@ -271,6 +279,7 @@ export {
   fetchRouteRealtime,
   duration,
   unique,
+  defaultSettings,
 };
 
 export type {
@@ -281,4 +290,5 @@ export type {
   Route,
   FullyDescribedStopArea,
   RouteRealtime,
+  Settings,
 };

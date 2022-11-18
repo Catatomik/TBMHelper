@@ -14,6 +14,7 @@ import { ref } from "vue";
 
 interface Props {
   stopPoint: StopPoint;
+  showUncertainty: boolean;
 }
 const props = defineProps<Props>();
 
@@ -184,7 +185,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
             'inline',
           ]">
             {{ duration(realtimeRoutesScheduleData.waittime, true, true) }}
-          <p class="inline italic">
+          <p v-if="props.showUncertainty" class="inline italic">
             ±
             {{
                 parseInt(realtimeRoutesScheduleData.realtime) === 1 &&

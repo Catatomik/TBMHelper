@@ -98,7 +98,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
 </script>
 
 <template>
-  <div class="rounded-lg p-3 shadow-xl">
+  <div class="rounded-lg bg-slate-100 p-3 shadow-xl">
     <div class="flex items-center">
       <h3 class="text-center font-bold text-lg mx-auto">📍 {{ stopPoint.name }}</h3>
       <CloseButton

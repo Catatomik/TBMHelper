@@ -273,7 +273,7 @@ const defaultSettings: Settings = {
 };
 
 function getNewTopZIndex() {
-  let max = -1;
+  let max = 0;
   for (const el of document.querySelectorAll("body *")) {
     const zindex = parseInt(window.getComputedStyle(el).zIndex);
     if (zindex > max) max = zindex;

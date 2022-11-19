@@ -39,6 +39,7 @@ onUpdated(async () => {
       focusDiv.value?.focus();
     }, 300); // wait for transition on focusDiv to proceed
 });
+const c = console;
 </script>
 
 <template>
@@ -56,8 +57,8 @@ onUpdated(async () => {
     @keyup.esc="show(false)"
     @click="show(false)"
   >
-    <div class="m-auto w-fit pointer-events-none duration-300 min-w-[66%]">
-      <div class="shadow-lg flex flex-col w-full pointer-events-auto rounded-md" :class="[bgColor]">
+    <div class="m-auto w-fit duration-300 min-w-[66%]" @click="(e) => e.stopPropagation()">
+      <div class="shadow-lg flex flex-col w-full rounded-md" :class="[bgColor]">
         <div class="flex flex-shrink-0 items-center justify-between py-4 px-2 mx-2 border-b">
           <slot name="title">a</slot>
           <CloseButton class="ml-2 hover:scale-[110%] duration-300 justify-self-end" @click="show(false)" />

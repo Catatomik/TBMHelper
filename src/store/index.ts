@@ -214,9 +214,10 @@ async function fetchRouteRealtime(
         ...acc,
         ...result.destinations[val].map((rri) => ({
           ...rri,
-          waittime: rri.waittime
-            .match(/\d{2}/g)!
-            .reduce((acc, val, i) => acc + parseInt(val) * 60 ** (2 - i) * 1000, 0),
+          waittime:
+            rri.waittime
+              .match(/\d{2}/g)
+              ?.reduce((acc, val, i) => acc + parseInt(val) * 60 ** (2 - i) * 1000, 0) || Infinity,
         })),
       ],
       [] as RouteRealtimeInfos<"TREATED">[],

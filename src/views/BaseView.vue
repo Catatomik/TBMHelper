@@ -247,7 +247,7 @@ function getWantedStops(stops: typeof selectedStops.value) {
               />
             </svg>
           </button>
-          <SettingsComp ref="settingsComp" v-model="settings" :initShown="false" />
+          <SettingsComp ref="settingsComp" v-model="settings" :init-shown="false" />
         </div>
       </div>
       <h3 v-if="!getWantedStops(selectedStops).length" class="mt-5 text-center font-bold text-lg">

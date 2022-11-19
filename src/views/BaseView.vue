@@ -17,7 +17,9 @@ import SettingsComp from "@/components/BaseSettings.vue";
 
 const showSettingsButton = ref<HTMLButtonElement | null>(null);
 const settingsComp = ref<InstanceType<typeof SettingsComp> | null>(null);
-const settings = ref<Settings>(defaultSettings);
+const settings = ref<Settings>(
+  localStorage.settings ? JSON.parse(localStorage.settings) : { ...defaultSettings },
+);
 
 const route = useRoute();
 let query = { ...route.query };
@@ -212,6 +214,12 @@ function getWantedStops(stops: typeof selectedStops.value) {
     [] as StopPoint[],
   );
 }
+
+function updateStoredSettings() {
+  setTimeout(() => {
+    localStorage.settings = JSON.stringify(settings.value);
+  }, 50);
+}
 </script>
 
 <template>
@@ -247,7 +255,12 @@ function getWantedStops(stops: typeof selectedStops.value) {
               />
             </svg>
           </button>
-          <SettingsComp ref="settingsComp" v-model="settings" :init-shown="false" />
+          <SettingsComp
+            ref="settingsComp"
+            v-model="settings"
+            :init-shown="false"
+            @update:model-value="updateStoredSettings"
+          />
         </div>
       </div>
       <h3 v-if="!getWantedStops(selectedStops).length" class="mt-5 text-center font-bold text-lg">

@@ -101,18 +101,20 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
   <div class="rounded-lg p-3 shadow-xl">
     <div class="flex items-center">
       <h3 class="text-center font-bold text-lg mx-auto">📍 {{ stopPoint.name }}</h3>
-      <CloseButton :borderColor="'border-orange-400'" :fillColor="'fill-orange-400'" @click="emit('softDelete')" />
+      <CloseButton :border-color="'border-orange-400'" :fill-color="'fill-orange-400'" @click="emit('softDelete')" />
       <CloseButton class="ml-2" @click="emit('hardDelete')" />
     </div>
     <hr class="my-2" />
-    <p v-if="
+    <p
+v-if="
       Object.values(realtimeRoutesSchedules).every(
         (rrs) => !('destinations' in rrs) || rrs.route.fetch === FetchStatus.Errored,
       )
     " class="text-red-700">
       Impossible de récupérer les horaires de cet arrêt
     </p>
-    <div v-else v-for="(realtimeRoutesSchedule, i) of realtimeRoutesSchedules" :key="i" :class="[
+    <div
+v-for="(realtimeRoutesSchedule, i) of realtimeRoutesSchedules" v-else :key="i" :class="[
       'mt-2',
       'w-fit px-2 pt-2',
       realtimeRoutesSchedule.route.fetch === FetchStatus.Errored
@@ -124,7 +126,8 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
             : '',
       'rounded-lg border-4 border-transparent',
     ]">
-      <img v-if="'id' in realtimeRoutesSchedule.route.lineDetails" width="25" class="inline align-middle"
+      <img
+v-if="'id' in realtimeRoutesSchedule.route.lineDetails" width="25" class="inline align-middle"
         :src="realtimeRoutesSchedule.route.lineDetails.picto" />
       <p class="mx-1 inline align-middle">
         {{
@@ -145,24 +148,29 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
       <p v-if="realtimeRoutesSchedule.route.fetch === FetchStatus.Errored" class="text-red-700">
         Erreur lors de la récupération des horaires
       </p>
-      <p v-else-if="
+      <p
+v-else-if="
         !('destinations' in realtimeRoutesSchedule) ||
         !Object.keys(realtimeRoutesSchedule.destinations).length
       " class="mx-3">
         ∅
       </p>
       <ul v-else>
-        <li class="list-none mx-3 m-0" v-for="realtimeRoutesScheduleData of realtimeRoutesSchedule.destinations"
-          :key="realtimeRoutesScheduleData.trip_id">
-          <img v-if="parseInt(realtimeRoutesScheduleData.realtime) === 1" src="/realtime.gif" alt="Temps réel"
+        <li
+v-for="realtimeRoutesScheduleData of realtimeRoutesSchedule.destinations"
+          :key="realtimeRoutesScheduleData.trip_id" class="list-none mx-3 m-0">
+          <img
+v-if="parseInt(realtimeRoutesScheduleData.realtime) === 1" src="/realtime.gif" alt="Temps réel"
             class="blue inline w-4 mr-2 align-middle" />
-          <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+          <svg
+v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
             class="blue inline w-4 mr-2 align-middle">
             <!--! Font Awesome Pro 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
             <path
               d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z" />
           </svg>
-          <p :class="[
+          <p
+:class="[
             realtimeRoutesScheduleData.waittime < 3 * 60_000
               ? 'text-red-500'
               : realtimeRoutesScheduleData.waittime < 5 * 60_000

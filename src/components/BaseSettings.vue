@@ -69,8 +69,8 @@ onUpdated(() => {
       <h1 class="text-2xl text-center">Paramètres</h1>
     </template>
     <template #content>
-      <div class="flex bg-slate-300 p-2 rounded-lg w-fit">
-        <p class="mr-2 align-middle">Incertitudes</p>
+      <div class="flex items-center bg-slate-300 p-2 rounded-lg w-fit">
+        <p class="mr-2">Incertitudes</p>
         <div class="flex items-center p-2 bg-slate-200 rounded-md">
           <input v-model="settings.uncertainty" type="checkbox" @input="$emit('update:modelValue', settings)" />
         </div>

@@ -1,21 +1,51 @@
 <script setup lang="ts">
 import type { Settings } from "@/store";
-import { ref } from "vue";
+import { onUpdated, ref } from "vue";
+import BaseModal from "@/components/BaseModal.vue";
+
+const modalComp = ref<InstanceType<typeof BaseModal> | null>(null);
 
 interface Props {
-  shown: boolean;
+  initShown?: boolean;
   modelValue: Settings;
 }
-
-const props = defineProps<Props>();
-
+const props = withDefaults(defineProps<Props>(), { initShown: false });
 const settings = ref<Settings>(props.modelValue);
 
-defineEmits(["update:modelValue"]);
+const emit = defineEmits<{
+  (e: "update:shown", shown: boolean): void;
+  (e: "update:modelValue", settings: Settings): void;
+}>();
+
+const smBreakpoint = 640;
+
+const shown = ref<boolean>(props.initShown);
+function show(s = !shown.value) {
+  if (modalComp.value?.shown != s && width.value <= smBreakpoint) modalComp.value?.show(s);
+  if (s === shown.value) return;
+  shown.value = s;
+  emit("update:shown", s);
+}
+
+defineExpose({
+  show,
+  shown,
+});
+
+const width = ref<number>(window.innerWidth);
+let modalCompNeedUpdate = false;
+addEventListener("resize", () => {
+  if (width.value > smBreakpoint === window.innerWidth <= smBreakpoint) modalCompNeedUpdate = true;
+  width.value = window.innerWidth;
+});
+
+onUpdated(() => {
+  if (modalCompNeedUpdate) modalComp.value?.show(shown.value);
+});
 </script>
 
 <template>
-  <div>
+  <div v-if="width > smBreakpoint">
     <div
       ref="accordion"
       class="flex overflow-hidden transition-all duration-500 max-w-0 max-h-fit mx-2 my-2 whitespace-nowrap bg-slate-300 rounded-lg"
@@ -29,7 +59,6 @@ defineEmits(["update:modelValue"]);
             <input
               v-model="settings.uncertainty"
               type="checkbox"
-              class="bg-transparent text-inherit time"
               @input="$emit('update:modelValue', settings)"
             />
           </div>
@@ -37,4 +66,29 @@ defineEmits(["update:modelValue"]);
       </div>
     </div>
   </div>
+  <BaseModal
+    v-else
+    ref="modalComp"
+    @update:shown="
+      (s) => {
+        if (s != shown) show();
+      }
+    "
+  >
+    <template #title>
+      <h1 class="text-2xl text-center">Paramètres</h1>
+    </template>
+    <template #content>
+      <div class="bg-slate-300 p-2 rounded-lg w-fit">
+        <span class="mr-2">Incertitudes</span>
+        <div class="inline-block p-1 px-2 bg-slate-200 rounded-md">
+          <input
+            v-model="settings.uncertainty"
+            type="checkbox"
+            @input="$emit('update:modelValue', settings)"
+          />
+        </div>
+      </div>
+    </template>
+  </BaseModal>
 </template>

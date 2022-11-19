@@ -15,8 +15,8 @@ import { onBeforeRouteUpdate, useRoute } from "vue-router";
 import StopPointComp from "@/components/StopPoint.vue";
 import SettingsComp from "@/components/BaseSettings.vue";
 
-const showExtraSettingsButton = ref<HTMLButtonElement | null>(null);
-const showExtraSettings = ref<boolean>(false);
+const showSettingsButton = ref<HTMLButtonElement | null>(null);
+const settingsComp = ref<InstanceType<typeof SettingsComp> | null>(null);
 const settings = ref<Settings>(defaultSettings);
 
 const route = useRoute();
@@ -144,11 +144,7 @@ function removeStopPoint(stopArea: FullyDescribedStopArea, stopPoint: StopPoint)
   queryInternallyUpdated = true;
   router.push({ query });
 
-  if (
-    stopArea.details.stopPoints.every((s) =>
-      excludedStopPoints.value.find(([_, stopPointId]) => s.id === stopPointId),
-    )
-  )
+  if (stopArea.details.stopPoints.every((s) => excludedStopPoints.value.find((esp) => s.id === esp[1])))
     removeStop(stopArea);
 }
 
@@ -194,7 +190,7 @@ function serializeExcludedStopPoints(excludedStopPoints: [StopArea["id"], StopPo
     partialExcludedStopPoints.push(
       `${stopAreaNumber}-${excludedStopPoints
         .filter(([stopArea]) => stopArea === stopAreaId)
-        .map(([_, stopPointId]) => stopPointId.substring("stop_point:".length))
+        .map((esp) => esp[1].substring("stop_point:".length))
         .join("-")}`,
     );
   }
@@ -239,10 +235,10 @@ function getWantedStops(stops: typeof selectedStops.value) {
         </div>
         <div class="w-1/3 my-auto flex ml-1">
           <button
-            ref="showExtraSettingsButton"
+            ref="showSettingsButton"
             class="flex h-fit self-center hover:scale-[120%] pulse-scale-focus transition-scale p-2 bg-slate-300 rounded-md"
-            :class="{ 'rotate-180': showExtraSettings }"
-            @click="(showExtraSettings = !showExtraSettings), showExtraSettingsButton?.blur()"
+            :class="{ 'rotate-180': settingsComp?.shown }"
+            @click="settingsComp?.show(), showSettingsButton?.blur()"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="w-6">
               <!--! Font Awesome Pro 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2022 Fonticons, Inc. -->
@@ -251,7 +247,7 @@ function getWantedStops(stops: typeof selectedStops.value) {
               />
             </svg>
           </button>
-          <SettingsComp v-model="settings" :shown="showExtraSettings" />
+          <SettingsComp ref="settingsComp" v-model="settings" :initShown="false" />
         </div>
       </div>
       <h3 v-if="!getWantedStops(selectedStops).length" class="mt-5 text-center font-bold text-lg">

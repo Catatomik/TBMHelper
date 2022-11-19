@@ -271,6 +271,15 @@ const defaultSettings: Settings = {
   uncertainty: false,
 };
 
+function getNewTopZIndex() {
+  let max = -1;
+  for (const el of document.querySelectorAll("body *")) {
+    const zindex = parseInt(window.getComputedStyle(el).zIndex);
+    if (zindex > max) max = zindex;
+  }
+  return max + 1;
+}
+
 export {
   fetchStops,
   fetchStopAreaDetails,
@@ -280,6 +289,7 @@ export {
   duration,
   unique,
   defaultSettings,
+  getNewTopZIndex,
 };
 
 export type {

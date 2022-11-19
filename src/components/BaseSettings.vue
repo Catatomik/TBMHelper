@@ -46,48 +46,34 @@ onUpdated(() => {
 
 <template>
   <div v-if="width > smBreakpoint">
-    <div
-      ref="accordion"
+    <div ref="accordion"
       class="flex overflow-hidden transition-all duration-500 max-w-0 max-h-fit mx-2 my-2 whitespace-nowrap bg-slate-300 rounded-lg"
-      :class="{ 'max-w-full': shown }"
-    >
+      :class="{ 'max-w-full': shown }">
       <div class="flex flex-col m-2">
         <div class="inline-block">
           <!-- mb-1 -->
           <span class="mr-2">Incertitudes</span>
-          <div class="inline-block p-1 px-2 bg-slate-200 rounded-md">
-            <input
-              v-model="settings.uncertainty"
-              type="checkbox"
-              @input="$emit('update:modelValue', settings)"
-            />
-          </div>
+          <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">
+            <input v-model="settings.uncertainty" type="checkbox" @input="$emit('update:modelValue', settings)" />
+          </span>
         </div>
       </div>
     </div>
   </div>
-  <BaseModal
-    v-else
-    ref="modalComp"
-    @update:shown="
-      (s) => {
-        if (s != shown) show();
-      }
-    "
-  >
+  <BaseModal v-else ref="modalComp" @update:shown="
+    (s) => {
+      if (s != shown) show();
+    }
+  ">
     <template #title>
       <h1 class="text-2xl text-center">Paramètres</h1>
     </template>
     <template #content>
       <div class="bg-slate-300 p-2 rounded-lg w-fit">
         <span class="mr-2">Incertitudes</span>
-        <div class="inline-block p-1 px-2 bg-slate-200 rounded-md">
-          <input
-            v-model="settings.uncertainty"
-            type="checkbox"
-            @input="$emit('update:modelValue', settings)"
-          />
-        </div>
+        <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">
+          <input v-model="settings.uncertainty" type="checkbox" @input="$emit('update:modelValue', settings)" />
+        </span>
       </div>
     </template>
   </BaseModal>

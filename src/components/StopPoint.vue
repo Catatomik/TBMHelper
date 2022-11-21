@@ -76,16 +76,6 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
       realtimeRoutesSchedules.value[route.id] = r
         ? { destinations: r.destinations.sort((a, b) => a.waittime - b.waittime), route }
         : { route };
-      if (r) if (intId) clearInterval(intId);
-      intId = setInterval(() => {
-        if ("destinations" in realtimeRoutesSchedules.value[route.id]) {
-          const rrs = realtimeRoutesSchedules.value[route.id] as RouteRealtime & { route: OperatingRoute };
-          rrs.destinations = rrs.destinations.map((d) => ({
-            ...d,
-            waittime: d.waittime > 1_000 ? d.waittime - 1_000 : 0,
-          }));
-        }
-      }, 1_000);
     })
     .catch((_) => {
       route.fetch = FetchStatus.Errored;
@@ -97,6 +87,11 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
       }, 10_000);
     });
 }
+
+const now = ref<number>(Date.now());
+setInterval(() => {
+  now.value = Date.now();
+}, 1000);
 </script>
 
 <template>
@@ -210,7 +205,11 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
             {{
               props.settings.dates
                 ? dateCompact(Date.now() + realtimeRoutesScheduleData.waittime)
-                : duration(realtimeRoutesScheduleData.waittime, true, true)
+                : duration(
+                    realtimeRoutesScheduleData.waittime - (now - realtimeRoutesScheduleData.fetched),
+                    true,
+                    true,
+                  )
             }}
             <span v-if="props.settings.uncertainty" class="inline italic">
               ±

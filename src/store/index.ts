@@ -266,10 +266,12 @@ function unique<T>(v: T, i: number, arr: T[]): boolean {
 
 interface Settings {
   uncertainty: boolean;
+  dates: boolean;
 }
 
 const defaultSettings: Settings = {
   uncertainty: false,
+  dates: false,
 };
 
 function getNewTopZIndex() {
@@ -279,6 +281,21 @@ function getNewTopZIndex() {
     if (zindex > max) max = zindex;
   }
   return max + 1;
+}
+
+function dateCompact(date: string | number | Date) {
+  if (!(date instanceof Date)) date = new Date(date);
+  const deltaD = date.getDate() - new Date().getDate();
+  let h: number | string = date.getHours();
+  let m: number | string = date.getMinutes();
+  let s: number | string = date.getSeconds();
+
+  if (h < 10) h = "0" + h;
+  if (m < 10) m = "0" + m;
+  if (s < 10) s = "0" + s;
+  return `${
+    deltaD > 0 ? (deltaD === 1 ? "demain, " : deltaD === 2 ? "après-demain, " : `dans ${deltaD} jours, `) : ""
+  }${h}:${m}:${s}`;
 }
 
 export {
@@ -291,6 +308,7 @@ export {
   unique,
   defaultSettings,
   getNewTopZIndex,
+  dateCompact,
 };
 
 export type {

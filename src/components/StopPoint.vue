@@ -204,9 +204,11 @@ setInterval(() => {
           >
             {{
               props.settings.dates
-                ? dateCompact(Date.now() + realtimeRoutesScheduleData.waittime)
+                ? dateCompact(realtimeRoutesScheduleData.fetched + realtimeRoutesScheduleData.waittime)
                 : duration(
-                    realtimeRoutesScheduleData.waittime - (Date.now() - realtimeRoutesScheduleData.fetched),
+                    realtimeRoutesScheduleData.waittime > now - realtimeRoutesScheduleData.fetched
+                      ? realtimeRoutesScheduleData.waittime - (now - realtimeRoutesScheduleData.fetched)
+                      : 0,
                     true,
                     true,
                   )

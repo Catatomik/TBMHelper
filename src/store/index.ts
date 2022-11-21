@@ -186,6 +186,7 @@ type RouteRealtimeInfos<T> = {
   vehicle_position_updated_at: StringifiedDateTime;
   waittime: T extends "RAW" ? StringifiedTime : number;
   waittime_text: string;
+  fetched: T extends "TREATED" ? number : undefined;
 };
 
 interface RouteRealtime<T extends RRIStats = "TREATED"> {
@@ -218,6 +219,7 @@ async function fetchRouteRealtime(
             rri.waittime
               .match(/\d{2}/g)
               ?.reduce((acc, val, i) => acc + parseInt(val) * 60 ** (2 - i) * 1000, 0) || Infinity,
+          fetched: Date.now(),
         })),
       ],
       [] as RouteRealtimeInfos<"TREATED">[],

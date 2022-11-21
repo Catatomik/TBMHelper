@@ -206,7 +206,7 @@ setInterval(() => {
               props.settings.dates
                 ? dateCompact(Date.now() + realtimeRoutesScheduleData.waittime)
                 : duration(
-                    realtimeRoutesScheduleData.waittime - (now - realtimeRoutesScheduleData.fetched),
+                    realtimeRoutesScheduleData.waittime - (Date.now() - realtimeRoutesScheduleData.fetched),
                     true,
                     true,
                   )
@@ -218,7 +218,7 @@ setInterval(() => {
                 realtimeRoutesScheduleData.vehicle_position_updated_at &&
                 realtimeRoutesScheduleData.vehicle_position_updated_at.length
                   ? duration(
-                      Date.now() -
+                      now -
                         Date.parse(realtimeRoutesScheduleData.vehicle_position_updated_at.replace(" ", "T")),
                       true,
                       true,

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   fetchRouteRealtime,
+  dateCompact,
   duration,
   type Route,
   type RouteRealtime,
@@ -9,13 +10,14 @@ import {
   fetchLineDetails,
   type StopPointDetails,
   type LineDetails,
+  type Settings,
 } from "@/store";
 import { ref } from "vue";
 import CloseButton from "@/components/CloseButton.vue";
 
 interface Props {
   stopPoint: StopPoint;
-  showUncertainty: boolean;
+  settings: Settings;
 }
 const props = defineProps<Props>();
 
@@ -205,8 +207,12 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
               'inline',
             ]"
           >
-            {{ duration(realtimeRoutesScheduleData.waittime, true, true) }}
-            <span v-if="props.showUncertainty" class="inline italic">
+            {{
+              props.settings.dates
+                ? dateCompact(Date.now() + realtimeRoutesScheduleData.waittime)
+                : duration(realtimeRoutesScheduleData.waittime, true, true)
+            }}
+            <span v-if="props.settings.uncertainty" class="inline italic">
               ±
               {{
                 parseInt(realtimeRoutesScheduleData.realtime) === 1 &&

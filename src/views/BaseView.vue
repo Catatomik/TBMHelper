@@ -271,7 +271,7 @@ function updateStoredSettings() {
           v-for="stopPoint of getWantedStops(selectedStops)"
           :key="stopPoint.id"
           :stop-point="stopPoint"
-          :show-uncertainty="settings.uncertainty"
+          :settings="settings"
           @soft-delete="
             removeStopPoint(
               selectedStops.find((s) =>

@@ -249,7 +249,7 @@ function duration(ms: number, includeSec = true, short = false): string {
   const mi = Math.floor(ms / 60000);
   ms -= mi * 60000;
   const smi = mi > 1 ? "s" : "";
-  const s = Math.round(ms / 1000);
+  const s = Math.floor(ms / 1000);
   const ss = s > 1 ? "s" : "";
 
   return `${y > 0 && y < Infinity ? `${y}${short ? "a" : ` an${sy}`} ` : ""}${

@@ -39,7 +39,6 @@ onUpdated(async () => {
       focusDiv.value?.focus();
     }, 300); // wait for transition on focusDiv to proceed
 });
-const c = console;
 </script>
 
 <template>

@@ -4,6 +4,7 @@ import {
   defaultSettings,
   fetchStopAreaDetails,
   fetchStops,
+  preferencesKeys,
   unique,
   type FullyDescribedStopArea,
   type Settings,
@@ -12,14 +13,19 @@ import {
 } from "@/store";
 import { onMounted, ref } from "vue";
 import { onBeforeRouteUpdate, useRoute } from "vue-router";
+import { Preferences } from "@capacitor/preferences";
 import StopPointComp from "@/components/StopPoint.vue";
 import SettingsComp from "@/components/BaseSettings.vue";
 
 const showSettingsButton = ref<HTMLButtonElement | null>(null);
 const settingsComp = ref<InstanceType<typeof SettingsComp> | null>(null);
-const settings = ref<Settings>(
-  localStorage.settings ? JSON.parse(localStorage.settings) : { ...defaultSettings },
-);
+
+// May wait for settings & use loader instead
+const settings = ref<Settings>({ ...defaultSettings });
+(async () => {
+  const { value } = await Preferences.get({ key: preferencesKeys.settings });
+  if (value) settings.value = JSON.parse(value);
+})();
 
 const route = useRoute();
 let query = { ...route.query };
@@ -217,7 +223,7 @@ function getWantedStops(stops: typeof selectedStops.value) {
 
 function updateStoredSettings() {
   setTimeout(() => {
-    localStorage.settings = JSON.stringify(settings.value);
+    Preferences.set({ key: preferencesKeys.settings, value: JSON.stringify(settings.value) });
   }, 50);
 }
 </script>

@@ -300,6 +300,11 @@ function dateCompact(date: string | number | Date) {
   }${h}:${m}:${s}`;
 }
 
+const preferencesKeys = {
+  settings: "settings",
+  location: "location",
+};
+
 export {
   fetchStops,
   fetchStopAreaDetails,
@@ -311,6 +316,7 @@ export {
   defaultSettings,
   getNewTopZIndex,
   dateCompact,
+  preferencesKeys,
 };
 
 export type {

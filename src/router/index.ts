@@ -1,9 +1,10 @@
 /// <reference types="vite/client" />
 
 import { createRouter, createWebHistory } from "vue-router";
+import { App, type URLOpenListenerEvent } from "@capacitor/app";
 import { Preferences } from "@capacitor/preferences";
 import BaseView from "../views/BaseView.vue";
-import { preferencesKeys } from "@/store";
+import { deserializeURL, preferencesKeys } from "@/store";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,7 +29,17 @@ router.beforeResolve(async (to, from) => {
 
   try {
     await Preferences.set({ key: preferencesKeys.location, value: to.fullPath });
-  } catch (_) { }
+  } catch (_) {}
+});
+
+App.addListener("appUrlOpen", function (event: URLOpenListenerEvent) {
+  const slug = event.url.split("tbmhelper.catadev.org").pop();
+
+  if (!slug) return;
+
+  router.push({
+    ...deserializeURL(slug),
+  });
 });
 
 export default router;

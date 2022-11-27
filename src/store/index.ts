@@ -305,6 +305,33 @@ const preferencesKeys = {
   location: "location",
 };
 
+interface DeserializedURL {
+  hash: string | undefined;
+  query: Record<string, string>;
+  path: string;
+}
+
+function deserializeURL(url: string): DeserializedURL {
+  url = decodeURI(url);
+
+  const splittedHash = url.split("#");
+  const splittedQuery = splittedHash[0].split("?");
+  const query: DeserializedURL["query"] = {};
+  if (splittedQuery.length > 1) {
+    for (const entry of splittedQuery[1].split("&")) {
+      const pair = entry.split("=");
+      if (pair.length < 2) continue;
+      query[pair[0]] = pair[1].replace(/\+/g, " ");
+    }
+  }
+
+  return {
+    hash: splittedHash[1],
+    query,
+    path: splittedQuery[0],
+  };
+}
+
 export {
   fetchStops,
   fetchStopAreaDetails,
@@ -317,6 +344,7 @@ export {
   getNewTopZIndex,
   dateCompact,
   preferencesKeys,
+  deserializeURL,
 };
 
 export type {

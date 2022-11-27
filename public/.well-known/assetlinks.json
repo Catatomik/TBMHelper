@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.catadev.tbmhelper",
+      "sha256_cert_fingerprints": [
+        "C4:61:49:33:05:70:A1:70:C3:9F:DF:B3:A2:B6:67:9F:26:58:E2:E9:2A:37:A6:88:65:D5:6D:15:D3:5E:81:85"
+      ]
+    }
+  }
+]

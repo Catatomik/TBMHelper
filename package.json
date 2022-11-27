@@ -7,10 +7,14 @@
     "preview": "vite preview --port 4173",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
+    "lint": "eslint ./src/ --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "prettier": "npx prettier \"**/*.{js,ts,vue,html}\" --write"
   },
   "dependencies": {
+    "@capacitor/android": "^4.5.0",
+    "@capacitor/app": "^4.1.1",
+    "@capacitor/core": "^4.5.0",
+    "@capacitor/preferences": "^4.0.2",
     "autoprefixer": "^10.4.13",
     "axios": "^1.2.0",
     "postcss": "^8.4.19",
@@ -19,6 +23,8 @@
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
+    "@capacitor/assets": "^2.0.4",
+    "@capacitor/cli": "^4.5.0",
     "@rushstack/eslint-patch": "^1.1.4",
     "@types/node": "^17",
     "@vitejs/plugin-vue": "^3.2.0",

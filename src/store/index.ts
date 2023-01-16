@@ -186,6 +186,7 @@ type RouteRealtimeInfos<T> = {
   vehicle_position_updated_at: StringifiedDateTime;
   waittime: T extends "RAW" ? StringifiedTime : number;
   waittime_text: string;
+  departure_delay: T extends "TREATED" ? number : undefined;
   fetched: T extends "TREATED" ? number : undefined;
 };
 
@@ -209,16 +210,18 @@ async function fetchRouteRealtime(
       )}/${encodeURI(route.id)}`,
     )
   ).data as RouteRealtime<"RAW">;
+  let waittime = Infinity;
   return {
     destinations: (Object.keys(result.destinations) as Array<keyof typeof result["destinations"]>).reduce(
       (acc, val) => [
         ...acc,
         ...result.destinations[val].map((rri) => ({
           ...rri,
-          waittime:
+          waittime: (waittime =
             rri.waittime
               .match(/\d{2}/g)
-              ?.reduce((acc, val, i) => acc + parseInt(val) * 60 ** (2 - i) * 1000, 0) || Infinity,
+              ?.reduce((acc, val, i) => acc + parseInt(val) * 60 ** (2 - i) * 1000, 0) || Infinity),
+          departure_delay: Date.parse(rri.departure_theorique.replace(" ", "T")) - waittime - Date.now(),
           fetched: Date.now(),
         })),
       ],

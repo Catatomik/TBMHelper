@@ -74,6 +74,12 @@ onUpdated(() => {
               <input v-model="settings.dates" type="checkbox" @input="emit('update:modelValue', settings)" />
             </span>
           </div>
+          <div class="flex items-center mt-1">
+            <p class="mr-2">Affichage du retard</p>
+            <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">
+              <input v-model="settings.delay" type="checkbox" @input="emit('update:modelValue', settings)" />
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -106,6 +112,12 @@ onUpdated(() => {
           <p class="mr-2">Affichage des dates</p>
           <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">
             <input v-model="settings.dates" type="checkbox" @input="emit('update:modelValue', settings)" />
+          </span>
+        </div>
+        <div class="flex items-center mt-1">
+          <p class="mr-2">Affichage du retard</p>
+          <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">
+            <input v-model="settings.delay" type="checkbox" @input="emit('update:modelValue', settings)" />
           </span>
         </div>
       </div>

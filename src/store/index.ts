@@ -269,11 +269,13 @@ function unique<T>(v: T, i: number, arr: T[]): boolean {
 interface Settings {
   uncertainty: boolean;
   dates: boolean;
+  delay: boolean;
 }
 
 const defaultSettings: Settings = {
   uncertainty: false,
   dates: false,
+  delay: false,
 };
 
 function getNewTopZIndex() {

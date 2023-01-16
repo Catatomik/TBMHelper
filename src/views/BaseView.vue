@@ -22,10 +22,6 @@ const settingsComp = ref<InstanceType<typeof SettingsComp> | null>(null);
 
 // May wait for settings & use loader instead
 const settings = ref<Settings>({ ...defaultSettings });
-(async () => {
-  const { value } = await Preferences.get({ key: preferencesKeys.settings });
-  if (value) settings.value = JSON.parse(value);
-})();
 
 const route = useRoute();
 let query = { ...route.query };

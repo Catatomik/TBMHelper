@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import type { Settings } from "@/store";
+import { preferencesKeys, type Settings } from "@/store";
 import { onUpdated, ref } from "vue";
 import BaseModal from "@/components/BaseModal.vue";
+import { Preferences } from "@capacitor/preferences";
 
 const modalComp = ref<InstanceType<typeof BaseModal> | null>(null);
 
@@ -11,6 +12,10 @@ interface Props {
 }
 const props = withDefaults(defineProps<Props>(), { initShown: false });
 const settings = ref<Settings>(props.modelValue);
+(async () => {
+  const { value } = await Preferences.get({ key: preferencesKeys.settings });
+  if (value) settings.value = JSON.parse(value);
+})();
 
 const emit = defineEmits<{
   (e: "update:shown", shown: boolean): void;

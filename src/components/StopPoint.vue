@@ -226,8 +226,11 @@ setInterval(() => {
             ]"
           >
             {{
-              (realtimeRoutesScheduleData.departure_delay > 0 ? "+" : "-") +
-                duration(realtimeRoutesScheduleData.departure_delay, true, true) || "0s"
+              (realtimeRoutesScheduleData.departure_delay > 0
+                ? "+"
+                : realtimeRoutesScheduleData.departure_delay < 0
+                ? "-"
+                : "") + (duration(realtimeRoutesScheduleData.departure_delay, true, true) || "0s")
             }}
           </span>
           <span

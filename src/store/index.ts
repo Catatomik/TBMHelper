@@ -256,7 +256,7 @@ function duration(ms: number, includeSec = true, short = false): string {
     mo > 0 ? `${mo}${short ? "mo" : ` mois`} ` : ""
   }${d > 0 ? `${d}${short ? "j" : ` jour${sd}`} ` : ""}${h > 0 ? `${h}${short ? "h" : ` heure${sh}`} ` : ""}${
     mi > 0 ? `${mi}${short ? ` min${smi}` : ` minute${smi}`} ` : ""
-  }${s > 0 && includeSec ? `${s}${short ? "s" : ` seconde${ss}`} ` : ""}`.replace(/ $/g, "");
+  }${s > 0 && includeSec ? `${s}${short ? "s" : ` seconde${ss}`}` : ""}`.replace(/ $/g, "");
 }
 
 /**

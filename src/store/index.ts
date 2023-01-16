@@ -212,7 +212,7 @@ async function fetchRouteRealtime(
   ).data as RouteRealtime<"RAW">;
   let waittime = Infinity;
   return {
-    destinations: (Object.keys(result.destinations) as Array<keyof typeof result["destinations"]>).reduce(
+    destinations: (Object.keys(result.destinations) as Array<keyof (typeof result)["destinations"]>).reduce(
       (acc, val) => [
         ...acc,
         ...result.destinations[val].map((rri) => ({

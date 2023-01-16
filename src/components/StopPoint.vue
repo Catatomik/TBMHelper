@@ -67,7 +67,7 @@ fetchStopPointDetails(props.stopPoint.routes[0], props.stopPoint).then((stopPoin
   });
 });
 
-function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
+function refreshRouteRealtime(route: OperatingRoute) {
   route.fetch = FetchStatus.Fetching;
   fetchRouteRealtime(route.stopPointDetails, route.lineDetails, route)
     .then((r) => {
@@ -83,7 +83,7 @@ function refreshRouteRealtime(route: OperatingRoute, intId?: number) {
     })
     .finally(() => {
       setTimeout(() => {
-        refreshRouteRealtime(route, intId);
+        refreshRouteRealtime(route);
       }, 10_000);
     });
 }
@@ -190,7 +190,7 @@ setInterval(() => {
               d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"
             />
           </svg>
-          <p
+          <span
             :class="[
               realtimeRoutesScheduleData.waittime < 3 * 60_000
                 ? 'text-red-500'
@@ -211,24 +211,43 @@ setInterval(() => {
                       : 0,
                     true,
                     true,
-                  )
+                  ) || "0s"
             }}
-            <span v-if="props.settings.uncertainty" class="inline italic">
-              ±
-              {{
-                parseInt(realtimeRoutesScheduleData.realtime) === 1 &&
-                realtimeRoutesScheduleData.vehicle_position_updated_at &&
-                realtimeRoutesScheduleData.vehicle_position_updated_at.length
-                  ? duration(
-                      now -
-                        Date.parse(realtimeRoutesScheduleData.vehicle_position_updated_at.replace(" ", "T")),
-                      true,
-                      true,
-                    )
-                  : "10s"
-              }}
-            </span>
-          </p>
+          </span>
+          <span
+            v-if="parseInt(realtimeRoutesScheduleData.realtime) === 1 && props.settings.delay"
+            :class="[
+              Math.abs(realtimeRoutesScheduleData.departure_delay) < 2.5 * 60_000
+                ? 'text-emerald-500'
+                : Math.abs(realtimeRoutesScheduleData.departure_delay) < 5 * 60_000
+                ? 'text-orange-500'
+                : 'text-red-500',
+              'inline bg-slate-300 rounded-md ml-1 px-1',
+            ]"
+          >
+            {{
+              (realtimeRoutesScheduleData.departure_delay > 0 ? "+" : "-") +
+                duration(realtimeRoutesScheduleData.departure_delay, true, true) || "0s"
+            }}
+          </span>
+          <span
+            v-if="props.settings.uncertainty"
+            class="inline italic bg-slate-300 rounded-md ml-1 px-1 text-"
+          >
+            {{
+              parseInt(realtimeRoutesScheduleData.realtime) === 1 &&
+              realtimeRoutesScheduleData.vehicle_position_updated_at &&
+              realtimeRoutesScheduleData.vehicle_position_updated_at.length
+                ? "±" +
+                  duration(
+                    now -
+                      Date.parse(realtimeRoutesScheduleData.vehicle_position_updated_at.replace(" ", "T")),
+                    true,
+                    true,
+                  )
+                : "±10s"
+            }}
+          </span>
           <p class="inline ml-2">
             {{
               realtimeRoutesSchedule.route.stopPointDetails.schedules.destinations.length > 1

@@ -59,11 +59,11 @@ onUpdated(async () => {
     <div class="m-auto w-fit duration-300 min-w-[66%]" @click="(e) => e.stopPropagation()">
       <div class="shadow-lg flex flex-col w-full rounded-md" :class="[bgColor]">
         <div class="flex flex-shrink-0 items-center justify-between py-4 px-2 mx-2 border-b">
-          <slot name="title">a</slot>
+          <slot name="title"></slot>
           <CloseButton class="ml-2 hover:scale-[110%] duration-300 justify-self-end" @click="show(false)" />
         </div>
         <div class="relative p-4">
-          <slot name="content">b</slot>
+          <slot name="content"></slot>
         </div>
       </div>
     </div>

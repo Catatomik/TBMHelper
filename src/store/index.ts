@@ -38,9 +38,11 @@ interface Route {
   name: string; // route destination
 }
 
+type StopPointId = `stop_point:${string}`;
+
 interface StopPoint {
   hasWheelchairBoarding: boolean;
-  id: `stop_point:${string}`;
+  id: StopPointId;
   name: string; // stop point name
   routes: Route[];
 }
@@ -91,14 +93,16 @@ async function fetchStopAreaDetails(stop: StopArea): Promise<FullyDescribedStopA
   }
 }
 
+type VehicleJourneyId = `vehicle_journey:${string}`;
+
 interface Schedules {
   day: number;
   datetimes: {
     [date: string]: {
       datetime: string;
       directionName: string;
-      timestamp: number;
-      vehicle_journey: `vehicle_journey:${string}`;
+      timestamp: number; // /!\ in seconds
+      vehicle_journey: VehicleJourneyId;
     }[];
   };
   destinations: string[];
@@ -107,7 +111,7 @@ interface Schedules {
 interface StopPointDetails {
   externalCode: string;
   hasWheelchairBoarding: false;
-  id: `stop_point:${string}`;
+  id: StopPointId;
   latitude: string;
   longitude: string;
   name: string;
@@ -231,6 +235,83 @@ async function fetchRouteRealtime(
   };
 }
 
+interface VehicleJourneySchedule<T extends RRIStats> {
+  arrival_time: string;
+  departure_time: T extends "RAW" ? string : number;
+  drop_off_allowed: boolean;
+  headsign: string;
+  pickup_allowed: boolean;
+  skipped_stop: boolean;
+  stop_point: {
+    address: {
+      house_number: number;
+      id: string;
+      label: string;
+      name: string;
+      coord: { lon: string; lat: string };
+    };
+    codes: { type: string; value: number }[];
+    coord: { lon: string; lat: string };
+    equipments: [];
+    fare_zone: { name: string };
+    id: StopPointId;
+    label: string;
+    links: [];
+    name: string;
+  };
+  utc_arrival_time: string;
+  utc_departure_time: string;
+}
+
+async function fetchVehicleJourney(
+  referenceSchedule: Schedules["datetimes"][string][number] & { stopPointId: StopPointId },
+): Promise<VehicleJourneySchedule<"TREATED">[] | null> {
+  try {
+    const vehicleJourney = (await instance.get(`get-vehicle-schedule/${referenceSchedule.vehicle_journey}`))
+      .data as VehicleJourneySchedule<"RAW">[];
+    const refScheduleInJourney = vehicleJourney.find(
+      (schedule) => schedule.stop_point.id === referenceSchedule.stopPointId,
+    );
+    if (refScheduleInJourney) vehicleJourney.splice(0, vehicleJourney.indexOf(refScheduleInJourney));
+
+    const referenceScheduleDate = new Date(referenceSchedule.timestamp * 1_000);
+    const referenceScheduleDateHMS =
+      ((referenceScheduleDate.getHours() * 60 + referenceScheduleDate.getMinutes()) * 60 +
+        referenceScheduleDate.getSeconds()) *
+      1_000;
+
+    return vehicleJourney.map((schedule) => {
+      const scheduleHMSTime =
+        schedule.departure_time
+          .match(/\d{2}/g)
+          ?.reduce((acc, v, i) => acc + 1_000 * parseInt(v) * 60 ** (2 - i), 0) ?? NaN;
+
+      let HMSdiff = scheduleHMSTime - referenceScheduleDateHMS;
+      if (HMSdiff < 0) {
+        // Next day
+        HMSdiff += 24 * 60 * 60 * 1_000;
+      }
+
+      return {
+        ...schedule,
+        departure_time: new Date(referenceScheduleDate.getTime() + HMSdiff).getTime(),
+      };
+    });
+  } catch (_) {
+    return null;
+  }
+}
+
+enum FetchStatus {
+  Errored = 0,
+  Fetching = 1,
+  Fetched = 2,
+}
+
+type OperatingRoute = Route & { stopPointDetails: StopPointDetails } & {
+  lineDetails: LineDetails | { externalCode: string };
+} & { fetch: FetchStatus };
+
 /**
  * @param ms Une durée en secondes
  * @param includeSec Un booléen indiquant s'il faut inclure les secondes
@@ -349,6 +430,8 @@ export {
   fetchStopPointDetails,
   fetchLineDetails,
   fetchRouteRealtime,
+  fetchVehicleJourney,
+  FetchStatus,
   duration,
   unique,
   defaultSettings,
@@ -367,5 +450,9 @@ export type {
   Route,
   FullyDescribedStopArea,
   RouteRealtime,
+  RouteRealtimeInfos,
+  Schedules,
+  VehicleJourneySchedule,
+  OperatingRoute,
   Settings,
 };

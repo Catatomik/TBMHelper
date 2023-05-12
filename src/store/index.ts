@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ref } from "vue";
 
 const instance = axios.create({
   baseURL: "https://ws.infotbm.com/ws/1.0/",
@@ -337,6 +338,11 @@ function deserializeURL(url: string): DeserializedURL {
   };
 }
 
+const now = ref<number>(Date.now());
+setInterval(() => {
+  now.value = Date.now();
+}, 1000);
+
 export {
   fetchStops,
   fetchStopAreaDetails,
@@ -350,6 +356,7 @@ export {
   dateCompact,
   preferencesKeys,
   deserializeURL,
+  now,
 };
 
 export type {

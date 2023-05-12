@@ -9,11 +9,19 @@ import {
   fetchStopPointDetails,
   fetchLineDetails,
   type StopPointDetails,
-  type LineDetails,
   type Settings,
+  type RouteRealtimeInfos,
+  type Schedules,
+  fetchVehicleJourney,
+  type VehicleJourneySchedule,
+  type OperatingRoute,
+  FetchStatus,
+  now,
 } from "@/store";
 import { ref } from "vue";
 import CloseButton from "@/components/CloseButton.vue";
+import RouteHeader from "./RouteHeader.vue";
+import RealtimeJourneyModal from "./RealtimeJourneyModal.vue";
 
 interface Props {
   stopPoint: StopPoint;
@@ -26,21 +34,10 @@ const emit = defineEmits<{
   (e: "hardDelete"): void;
 }>();
 
-enum FetchStatus {
-  Errored = 0,
-  Fetching = 1,
-  Fetched = 2,
-}
-type OperatingRoute = Route & { stopPointDetails: StopPointDetails } & {
-  lineDetails: LineDetails | { externalCode: string };
-} & { fetch: FetchStatus };
-
 const realtimeRoutesSchedules = ref<{
   [x: Route["id"]]: (RouteRealtime & { route: OperatingRoute }) | { route: OperatingRoute };
 }>({});
 
-fetchStopPointDetails(props.stopPoint.routes[0], props.stopPoint).then((stopPointDetails) => {
-  if (!stopPointDetails) return;
 props.stopPoint.routes.forEach(async (route) => {
   const stopPointDetails = await fetchStopPointDetails(route, props.stopPoint);
   if (!stopPointDetails) return;
@@ -67,7 +64,6 @@ props.stopPoint.routes.forEach(async (route) => {
             : "Will be errored if reached",
         },
     fetch: FetchStatus.Fetching,
-    });
   });
 });
 
@@ -77,9 +73,23 @@ function refreshRouteRealtime(route: OperatingRoute) {
     .then((r) => {
       route.fetch = FetchStatus.Fetched;
 
-      realtimeRoutesSchedules.value[route.id] = r
-        ? { destinations: r.destinations.sort((a, b) => a.waittime - b.waittime), route }
-        : { route };
+      if (r) {
+        realtimeRoutesSchedules.value[route.id] = {
+          destinations: r.destinations.sort((a, b) => a.waittime - b.waittime),
+          route,
+        };
+        if (
+          journeyModalComp.value?.shown &&
+          realtimeSchedulesData.value &&
+          realtimeSchedulesData.value.route.id === route.id
+        ) {
+          const tripId = realtimeSchedulesData.value.trip.trip_id;
+          const RRI = r.destinations.find((d) => d.trip_id === tripId);
+          if (RRI) {
+            realtimeSchedulesData.value.trip = RRI;
+          }
+        }
+      } else realtimeRoutesSchedules.value[route.id] = { route };
     })
     .catch((_) => {
       route.fetch = FetchStatus.Errored;
@@ -92,10 +102,44 @@ function refreshRouteRealtime(route: OperatingRoute) {
     });
 }
 
-const now = ref<number>(Date.now());
-setInterval(() => {
-  now.value = Date.now();
-}, 1000);
+const journeyModalComp = ref<InstanceType<typeof RealtimeJourneyModal> | null>(null);
+
+const realtimeSchedulesData = ref<{
+  route: OperatingRoute;
+  trip: RouteRealtimeInfos<"TREATED">;
+  vehicleJourney: VehicleJourneySchedule<"TREATED">[];
+} | null>(null);
+async function displayRealtimeSchedules(
+  stopPointDetails: StopPointDetails,
+  trip: RouteRealtimeInfos<"TREATED">,
+) {
+  const dest = stopPointDetails.schedules.destinations.find(
+    (dest) => dest.includes(trip.destination_name) || trip.destination_name.includes(dest),
+  );
+  if (!dest) return;
+
+  let closestSchedule: [Schedules["datetimes"][string][number] | null, number] = [null, Infinity];
+  for (const dt of Object.values(stopPointDetails.schedules.datetimes).flat()) {
+    const diff = Math.abs(dt.timestamp * 1_000 - Date.parse(trip.departure_theorique.replace(" ", "T")));
+    if (diff < closestSchedule[1]) {
+      closestSchedule = [dt, diff];
+    }
+  }
+  if (!closestSchedule[0]) return;
+
+  const vehicleJourney = await fetchVehicleJourney({
+    ...closestSchedule[0],
+    stopPointId: props.stopPoint.id,
+  });
+  if (!vehicleJourney) return;
+
+  realtimeSchedulesData.value = {
+    route: realtimeRoutesSchedules.value[stopPointDetails.route.id].route,
+    trip,
+    vehicleJourney,
+  };
+  journeyModalComp.value?.show(true);
+}
 </script>
 
 <template>
@@ -109,6 +153,14 @@ setInterval(() => {
       />
       <CloseButton class="ml-2" @click="emit('hardDelete')" />
     </div>
+    <RealtimeJourneyModal
+      v-if="realtimeSchedulesData"
+      ref="journeyModalComp"
+      :route="realtimeSchedulesData.route"
+      :trip="realtimeSchedulesData.trip"
+      :journey="realtimeSchedulesData.vehicleJourney"
+      :settings="settings"
+    ></RealtimeJourneyModal>
     <hr class="my-2" />
     <p
       v-if="
@@ -137,28 +189,7 @@ setInterval(() => {
         'rounded-lg border-4 border-transparent',
       ]"
     >
-      <img
-        v-if="'id' in realtimeRoutesSchedule.route.lineDetails"
-        width="25"
-        class="inline align-middle"
-        :src="realtimeRoutesSchedule.route.lineDetails.picto"
-      />
-      <p class="mx-1 inline align-middle">
-        {{
-          realtimeRoutesSchedule.route.line.id.includes("TBC") ||
-          realtimeRoutesSchedule.route.line.id.includes("GIRONDE")
-            ? "🚌"
-            : realtimeRoutesSchedule.route.line.id.includes("TBT")
-            ? "🚋"
-            : realtimeRoutesSchedule.route.line.id.includes("SNC")
-            ? "🚆"
-            : ""
-        }}
-      </p>
-      <h4 class="font-bold text-base py-1 inline align-middle">
-        {{ realtimeRoutesSchedule.route.line.name }}
-      </h4>
-      <p class="inline align-middle ml-1">➜ {{ realtimeRoutesSchedule.route.name }}</p>
+      <RouteHeader :route="realtimeRoutesSchedule.route"></RouteHeader>
       <p v-if="realtimeRoutesSchedule.route.fetch === FetchStatus.Errored" class="text-red-700">
         Erreur lors de la récupération des horaires
       </p>
@@ -176,6 +207,12 @@ setInterval(() => {
           v-for="realtimeRoutesScheduleData of realtimeRoutesSchedule.destinations"
           :key="realtimeRoutesScheduleData.trip_id"
           class="list-none mx-3 m-0"
+          @click="
+            displayRealtimeSchedules(
+              realtimeRoutesSchedule.route.stopPointDetails,
+              realtimeRoutesScheduleData,
+            )
+          "
         >
           <img
             v-if="parseInt(realtimeRoutesScheduleData.realtime) === 1"

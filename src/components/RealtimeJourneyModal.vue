@@ -76,7 +76,9 @@ onUpdated(async () => {
         </div>
         <div class="relative py-2 px-4 overflow-auto">
           <div
-            v-for="schedule of props.journey.filter((schedule) => schedule.departure_time >= Date.now())"
+            v-for="schedule of props.journey.filter(
+              (schedule) => schedule.departure_time - trip.departure_delay >= Date.now(),
+            )"
             :key="schedule.stop_point.id"
             class="flex bg-slate-200 my-1 rounded-sm p-1"
           >

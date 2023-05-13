@@ -15,10 +15,10 @@
     "ionic:serve": "npm run dev"
   },
   "dependencies": {
-    "@capacitor/android": "^4.7.3",
-    "@capacitor/app": "^4.1.1",
-    "@capacitor/core": "^4.7.3",
-    "@capacitor/preferences": "^4.0.2",
+    "@capacitor/android": "^5.0.3",
+    "@capacitor/app": "^5.0.2",
+    "@capacitor/core": "^5.0.3",
+    "@capacitor/preferences": "^5.0.2",
     "autoprefixer": "^10.4.14",
     "axios": "^1.4.0",
     "postcss": "^8.4.23",
@@ -28,7 +28,7 @@
   },
   "devDependencies": {
     "@capacitor/assets": "^2.0.4",
-    "@capacitor/cli": "^4.7.3",
+    "@capacitor/cli": "^5.0.3",
     "@rushstack/eslint-patch": "^1.1.4",
     "@types/node": "^17",
     "@vitejs/plugin-vue": "^4.2.3",

@@ -1,27 +1,23 @@
 <script setup lang="ts">
-import {
-  fetchRouteRealtime,
-  dateCompact,
-  duration,
-  type Route,
-  type RouteRealtime,
-  type StopPoint,
-  fetchStopPointDetails,
-  fetchLineDetails,
-  type StopPointDetails,
-  type Settings,
-  type RouteRealtimeInfos,
-  type Schedules,
-  fetchVehicleJourney,
-  type VehicleJourneySchedule,
-  type OperatingRoute,
-  FetchStatus,
-  now,
-} from "@/store";
+import { dateCompact, duration, type Settings, FetchStatus, now } from "@/store";
 import { ref } from "vue";
 import CloseButton from "@/components/CloseButton.vue";
 import RouteHeader from "./RouteHeader.vue";
 import RealtimeJourneyModal from "./RealtimeJourneyModal.vue";
+import {
+  type StopPoint,
+  type Route,
+  type RouteRealtime,
+  type OperatingRoute,
+  fetchStopPointDetails,
+  fetchLineDetails,
+  fetchRouteRealtime,
+  type RouteRealtimeInfos,
+  type VehicleJourneySchedule,
+  type StopPointDetails,
+  type Schedules,
+  fetchVehicleJourney,
+} from "@/store/TBM";
 
 interface Props {
   stopPoint: StopPoint;

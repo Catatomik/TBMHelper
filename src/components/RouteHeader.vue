@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { OperatingRoute } from "@/store";
+import type { OperatingRoute } from "@/store/TBM";
 
 export interface RouteHeader {
   route: OperatingRoute;

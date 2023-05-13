@@ -1,21 +1,18 @@
 <script setup lang="ts">
 import router from "@/router";
-import {
-  defaultSettings,
-  fetchStopAreaDetails,
-  fetchStops,
-  preferencesKeys,
-  unique,
-  type FullyDescribedStopArea,
-  type Settings,
-  type StopArea,
-  type StopPoint,
-} from "@/store";
+import { defaultSettings, preferencesKeys, unique, type Settings } from "@/store";
 import { onMounted, ref } from "vue";
 import { onBeforeRouteUpdate, useRoute } from "vue-router";
 import { Preferences } from "@capacitor/preferences";
 import StopPointComp from "@/components/StopPoint.vue";
 import SettingsComp from "@/components/BaseSettings.vue";
+import {
+  type FullyDescribedStopArea,
+  type StopArea,
+  type StopPoint,
+  fetchStops,
+  fetchStopAreaDetails,
+} from "@/store/TBM";
 
 const showSettingsButton = ref<HTMLButtonElement | null>(null);
 const settingsComp = ref<InstanceType<typeof SettingsComp> | null>(null);

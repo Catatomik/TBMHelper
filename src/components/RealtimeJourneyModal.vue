@@ -1,17 +1,9 @@
 <script setup lang="ts">
 import { onMounted, onUpdated, ref } from "vue";
-import {
-  dateCompact,
-  duration,
-  getNewTopZIndex,
-  now,
-  type OperatingRoute,
-  type RouteRealtimeInfos,
-  type Settings,
-  type VehicleJourneySchedule,
-} from "@/store";
+import { dateCompact, duration, getNewTopZIndex, now, type Settings } from "@/store";
 import CloseButton from "./CloseButton.vue";
 import RouteHeader from "./RouteHeader.vue";
+import type { OperatingRoute, RouteRealtimeInfos, VehicleJourneySchedule } from "@/store/TBM";
 
 export interface Modal {
   route: OperatingRoute;

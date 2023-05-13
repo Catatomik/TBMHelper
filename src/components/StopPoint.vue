@@ -113,11 +113,6 @@ async function displayRealtimeSchedules(
   stopPointDetails: StopPointDetails,
   trip: RouteRealtimeInfos<"TREATED">,
 ) {
-  const dest = stopPointDetails.schedules.destinations.find(
-    (dest) => dest.includes(trip.destination_name) || trip.destination_name.includes(dest),
-  );
-  if (!dest) return;
-
   let closestSchedule: [Schedules["datetimes"][string][number] | null, number] = [null, Infinity];
   for (const dt of Object.values(stopPointDetails.schedules.datetimes).flat()) {
     const diff = Math.abs(dt.timestamp * 1_000 - Date.parse(trip.departure_theorique.replace(" ", "T")));

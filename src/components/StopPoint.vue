@@ -31,7 +31,7 @@ const emit = defineEmits<{
 }>();
 
 const realtimeRoutesSchedules = ref<{
-  [x: Route["id"]]: (RouteRealtime & { route: OperatingRoute }) | { route: OperatingRoute };
+  [x: Route["id"]]: RouteRealtime & { route: OperatingRoute };
 }>({});
 
 props.stopPoint.routes.forEach(async (route) => {
@@ -85,11 +85,11 @@ function refreshRouteRealtime(route: OperatingRoute) {
             realtimeSchedulesData.value.trip = RRI;
           }
         }
-      } else realtimeRoutesSchedules.value[route.id] = { route };
+      } else realtimeRoutesSchedules.value[route.id] = { destinations: [], route };
     })
     .catch((_) => {
       route.fetch = FetchStatus.Errored;
-      realtimeRoutesSchedules.value[route.id] = { route };
+      realtimeRoutesSchedules.value[route.id] = { destinations: [], route };
     })
     .finally(() => {
       setTimeout(() => {
@@ -164,43 +164,35 @@ async function displayRealtimeSchedules(
       Impossible de récupérer les horaires de cet arrêt
     </p>
     <div
-      v-for="(realtimeRoutesSchedule, i) of realtimeRoutesSchedules"
+      v-for="routeId of (Object.keys(realtimeRoutesSchedules) as (keyof typeof realtimeRoutesSchedules)[]).sort((a,b) => realtimeRoutesSchedules[a].route.line.id.localeCompare(realtimeRoutesSchedules[b].route.line.id))"
       v-else
-      :key="i"
+      :key="routeId"
       :class="[
         'mt-2',
         'w-fit px-2 pt-2',
-        realtimeRoutesSchedule.route.fetch === FetchStatus.Errored
+        realtimeRoutesSchedules[routeId].route.fetch === FetchStatus.Errored
           ? 'errored'
-          : realtimeRoutesSchedule.route.fetch === FetchStatus.Fetching
+          : realtimeRoutesSchedules[routeId].route.fetch === FetchStatus.Fetching
           ? 'fetching'
-          : realtimeRoutesSchedule.route.fetch === FetchStatus.Fetched
+          : realtimeRoutesSchedules[routeId].route.fetch === FetchStatus.Fetched
           ? 'fetched'
           : '',
         'rounded-lg border-4 border-transparent',
       ]"
     >
-      <RouteHeader :route="realtimeRoutesSchedule.route"></RouteHeader>
-      <p v-if="realtimeRoutesSchedule.route.fetch === FetchStatus.Errored" class="text-red-700">
+      <RouteHeader :route="realtimeRoutesSchedules[routeId].route"></RouteHeader>
+      <p v-if="realtimeRoutesSchedules[routeId].route.fetch === FetchStatus.Errored" class="text-red-700">
         Erreur lors de la récupération des horaires
       </p>
-      <p
-        v-else-if="
-          !('destinations' in realtimeRoutesSchedule) ||
-          !Object.keys(realtimeRoutesSchedule.destinations).length
-        "
-        class="mx-3"
-      >
-        ∅
-      </p>
+      <p v-else-if="!Object.keys(realtimeRoutesSchedules[routeId].destinations).length" class="mx-3">∅</p>
       <ul v-else>
         <li
-          v-for="realtimeRoutesScheduleData of realtimeRoutesSchedule.destinations"
+          v-for="realtimeRoutesScheduleData of realtimeRoutesSchedules[routeId].destinations"
           :key="realtimeRoutesScheduleData.trip_id"
           class="list-none mx-3 m-0"
           @click="
             displayRealtimeSchedules(
-              realtimeRoutesSchedule.route.stopPointDetails,
+              realtimeRoutesSchedules[routeId].route.stopPointDetails,
               realtimeRoutesScheduleData,
             )
           "
@@ -285,7 +277,7 @@ async function displayRealtimeSchedules(
           </span>
           <p class="inline ml-2">
             {{
-              realtimeRoutesSchedule.route.stopPointDetails.schedules.destinations.length > 1
+              realtimeRoutesSchedules[routeId].route.stopPointDetails.schedules.destinations.length > 1
                 ? `➜ ${realtimeRoutesScheduleData.destination_name.replace(/\./g, " ")}`
                 : ""
             }}

@@ -164,7 +164,11 @@ async function displayRealtimeSchedules(
       Impossible de récupérer les horaires de cet arrêt
     </p>
     <div
-      v-for="routeId of (Object.keys(realtimeRoutesSchedules) as (keyof typeof realtimeRoutesSchedules)[]).sort((a,b) => realtimeRoutesSchedules[a].route.line.id.localeCompare(realtimeRoutesSchedules[b].route.line.id))"
+      v-for="routeId of (
+        Object.keys(realtimeRoutesSchedules) as (keyof typeof realtimeRoutesSchedules)[]
+      ).sort((a, b) =>
+        realtimeRoutesSchedules[a].route.line.id.localeCompare(realtimeRoutesSchedules[b].route.line.id),
+      )"
       v-else
       :key="routeId"
       :class="[

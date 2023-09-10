@@ -18,6 +18,7 @@ import {
   type Schedules,
   fetchVehicleJourney,
   extractLineCode,
+  type lineType,
 } from "@/store/TBM";
 
 interface Props {
@@ -39,7 +40,11 @@ props.stopPoint.routes.forEach(async (route) => {
   const stopPointDetails = await fetchStopPointDetails(route, props.stopPoint);
   if (!stopPointDetails) return;
 
-  const lineDetails = await fetchLineDetails(route.line);
+  const lineDetails = (["Bus", "Bus Scolaire", "Tramway"] as lineType[]).includes(
+    stopPointDetails.route.line.type,
+  )
+    ? await fetchLineDetails(route.line)
+    : null;
 
   refreshRouteRealtime({
     ...route,

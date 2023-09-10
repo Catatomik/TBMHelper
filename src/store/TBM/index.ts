@@ -338,6 +338,7 @@ export type {
   StopArea,
   StopPoint,
   StopPointDetails,
+  lineType,
   LineDetails,
   Route,
   FullyDescribedStopArea,

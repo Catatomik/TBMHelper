@@ -17,6 +17,7 @@ import {
   type StopPointDetails,
   type Schedules,
   fetchVehicleJourney,
+  extractLineCode,
 } from "@/store/TBM";
 
 interface Props {
@@ -39,26 +40,16 @@ props.stopPoint.routes.forEach(async (route) => {
   if (!stopPointDetails) return;
 
   const lineDetails = await fetchLineDetails(route.line);
-  if (!lineDetails) return;
 
   refreshRouteRealtime({
     ...route,
     stopPointDetails,
-    lineDetails: lineDetails.length
-      ? route.line.id.includes("TBT")
-        ? { ...lineDetails[0], externalCode: route.line.name.match(/[A-Z]$/)![0] }
-        : lineDetails[0]
-      : {
-          externalCode: route.line.id.includes("TBT")
-            ? route.line.name.match(/[A-Z]$/)![0]
-            : route.line.id.includes("TBC") // TransGironde
-            ? route.line.id.match(/\d{2}$/)![0]
-            : route.line.id.includes("GIRONDE") // TransGironde
-            ? route.line.id.match(/[A-Z]+:Line:\d+(_R)?$/)![0]
-            : route.line.id.includes("SNC") // SNCF
-            ? route.line.id.match(/[A-Z]+-[0-9]+$/)![0]
-            : "Will be errored if reached",
-        },
+    lineDetails:
+      lineDetails == null
+        ? {
+            code: extractLineCode(route.line) ?? "Will be errored if reached",
+          }
+        : lineDetails,
     fetch: FetchStatus.Fetching,
   });
 });

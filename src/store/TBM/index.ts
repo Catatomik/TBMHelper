@@ -6,8 +6,10 @@ const instance = axios.create({
   timeout: 30_000,
 });
 
+type stopAreaId = `stop_area:${string}`;
+
 interface StopArea {
-  id: `stop_area:${string}`;
+  id: stopAreaId;
   name: string; // stop area name
   type: "line" | "stop_area";
   mode: string;
@@ -24,8 +26,9 @@ async function fetchStops(stop: string): Promise<StopArea[]> {
   }
 }
 
+type lineId = `line:${string}`;
 interface Line {
-  id: `line:${string}`;
+  id: lineId;
   isChartered: boolean;
   isHidden: boolean;
   isSpecial: boolean;
@@ -116,7 +119,7 @@ interface StopPointDetails {
   longitude: string;
   name: string;
   route: Omit<Route, "line"> & {
-    line: Omit<Line, "isSpecial" | "isHidden" | "isChartered" | "name"> & { type: string };
+    line: Omit<Line, "isSpecial" | "isHidden" | "isChartered" | "name"> & { type: lineType };
   };
   schedules: Schedules;
   stopAreaId: `stop_area:${string}`;
@@ -131,35 +134,50 @@ async function fetchStopPointDetails(route: Route, stop: StopPoint): Promise<Sto
   }
 }
 
+type lineType = "Bus" | "Bus Scolaire" | "Tramway" | "Train régional / TER" | "Autocar";
+
 interface LineDetails {
   code: string;
   color: string;
   externalCode: string;
   id: `line:${string}`;
-  impacts: {
-    alert: {
-      alertUpdates: unknown[];
-      cause: number;
-      causeName: string;
-      description: string;
-      id: number;
-      title: string;
-      type: number;
-      typeName: string;
-      workingNetwork: boolean;
-    };
-    transportMode: number;
-  }[];
   name: string;
   picto: string; // URL
   pictoCrossed: string;
+  routes: {
+    end: string;
+    externalCode: string;
+    id: string;
+    name: string;
+    start: string;
+    stopPointOrder: Record<string, number>;
+    stopPoints: {
+      address: string;
+      city: string;
+      externalCode: string;
+      fullLabel: string;
+      hasWheelchairBoarding: boolean;
+      id: StopPointId;
+      latitude: string;
+      longitude: string;
+      name: "string";
+      partialStop: boolean;
+      stopAreaId: stopAreaId;
+    }[];
+  }[];
   textColor: string; // HEX color
   transportMode: number;
+  type: lineType;
 }
 
-async function fetchLineDetails(line: Line): Promise<LineDetails[] | null> {
+function extractLineCode(line: Line) {
+  return line.id.match(/line:[a-zA-Z]+:(?<code>([a-zA-Z0-9-]+:?)+)/)?.groups?.code;
+}
+
+async function fetchLineDetails(line: Line): Promise<LineDetails | null> {
   try {
-    return (await instance.get(`alerts/by-transport/${encodeURI(line.id)}`)).data as LineDetails[];
+    return (await instance.get(`network/line-informations/${encodeURI(extractLineCode(line) || "")}`))
+      .data as LineDetails;
   } catch (_) {
     return null;
   }
@@ -205,14 +223,14 @@ interface RouteRealtime<T extends RRIStats = "TREATED"> {
 
 async function fetchRouteRealtime(
   stopPointDetails: StopPointDetails,
-  lineDetails: LineDetails | { externalCode: string },
+  lineDetails: LineDetails | { code: string },
   route: Route,
 ): Promise<RouteRealtime | null> {
   const result = (
     await instance.get(
-      `get-realtime-pass/${encodeURI(stopPointDetails.externalCode)}/${encodeURI(
-        lineDetails.externalCode,
-      )}/${encodeURI(route.id)}`,
+      `get-realtime-pass-by-id/${encodeURI(stopPointDetails.route.line.id)}/${encodeURI(
+        stopPointDetails.id,
+      )}/${encodeURI(lineDetails.code)}/${encodeURI(route.id)}`,
     )
   ).data as RouteRealtime<"RAW">;
   let waittime = Infinity;
@@ -303,13 +321,14 @@ async function fetchVehicleJourney(
 }
 
 type OperatingRoute = Route & { stopPointDetails: StopPointDetails } & {
-  lineDetails: LineDetails | { externalCode: string };
+  lineDetails: Parameters<typeof fetchRouteRealtime>[1];
 } & { fetch: FetchStatus };
 
 export {
   fetchStops,
   fetchStopAreaDetails,
   fetchStopPointDetails,
+  extractLineCode,
   fetchLineDetails,
   fetchRouteRealtime,
   fetchVehicleJourney,

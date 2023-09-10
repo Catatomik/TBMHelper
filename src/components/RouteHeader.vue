@@ -16,11 +16,13 @@ const props = defineProps<RouteHeader>();
   />
   <p class="mx-1 inline align-middle">
     {{
-      props.route.line.id.includes("TBC") || props.route.line.id.includes("GIRONDE")
+      props.route.stopPointDetails.route.line.type === "Bus" ||
+      props.route.stopPointDetails.route.line.type === "Autocar" ||
+      props.route.stopPointDetails.route.line.type === "Bus Scolaire"
         ? "🚌"
-        : props.route.line.id.includes("TBT")
+        : props.route.stopPointDetails.route.line.type === "Tramway"
         ? "🚋"
-        : props.route.line.id.includes("SNC")
+        : props.route.stopPointDetails.route.line.type === "Train régional / TER"
         ? "🚆"
         : ""
     }}

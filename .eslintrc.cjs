@@ -17,5 +17,9 @@ module.exports = {
   },
   rules: {
     "no-empty": ["warn", { allowEmptyCatch: true }],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { caughtErrorsIgnorePattern: "^_+$", argsIgnorePattern: "^_+$", varsIgnorePattern: "^_+$" },
+    ],
   },
 };

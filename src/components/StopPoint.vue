@@ -17,6 +17,8 @@ import {
   type StopPointDetails,
   type Schedules,
   fetchVehicleJourney,
+  extractLineCode,
+  type lineType,
 } from "@/store/TBM";
 
 interface Props {
@@ -38,27 +40,21 @@ props.stopPoint.routes.forEach(async (route) => {
   const stopPointDetails = await fetchStopPointDetails(route, props.stopPoint);
   if (!stopPointDetails) return;
 
-  const lineDetails = await fetchLineDetails(route.line);
-  if (!lineDetails) return;
+  const lineDetails = (["Bus", "Bus Scolaire", "Tramway"] as lineType[]).includes(
+    stopPointDetails.route.line.type,
+  )
+    ? await fetchLineDetails(route.line)
+    : null;
 
   refreshRouteRealtime({
     ...route,
     stopPointDetails,
-    lineDetails: lineDetails.length
-      ? route.line.id.includes("TBT")
-        ? { ...lineDetails[0], externalCode: route.line.name.match(/[A-Z]$/)![0] }
-        : lineDetails[0]
-      : {
-          externalCode: route.line.id.includes("TBT")
-            ? route.line.name.match(/[A-Z]$/)![0]
-            : route.line.id.includes("TBC") // TransGironde
-            ? route.line.id.match(/\d{2}$/)![0]
-            : route.line.id.includes("GIRONDE") // TransGironde
-            ? route.line.id.match(/[A-Z]+:Line:\d+(_R)?$/)![0]
-            : route.line.id.includes("SNC") // SNCF
-            ? route.line.id.match(/[A-Z]+-[0-9]+$/)![0]
-            : "Will be errored if reached",
-        },
+    lineDetails:
+      lineDetails == null
+        ? {
+            code: extractLineCode(route.line) ?? "Will be errored if reached",
+          }
+        : lineDetails,
     fetch: FetchStatus.Fetching,
   });
 });
@@ -164,7 +160,11 @@ async function displayRealtimeSchedules(
       Impossible de récupérer les horaires de cet arrêt
     </p>
     <div
-      v-for="routeId of (Object.keys(realtimeRoutesSchedules) as (keyof typeof realtimeRoutesSchedules)[]).sort((a,b) => realtimeRoutesSchedules[a].route.line.id.localeCompare(realtimeRoutesSchedules[b].route.line.id))"
+      v-for="routeId of (
+        Object.keys(realtimeRoutesSchedules) as (keyof typeof realtimeRoutesSchedules)[]
+      ).sort((a, b) =>
+        realtimeRoutesSchedules[a].route.line.id.localeCompare(realtimeRoutesSchedules[b].route.line.id),
+      )"
       v-else
       :key="routeId"
       :class="[

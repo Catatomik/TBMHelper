@@ -98,7 +98,7 @@ onUpdated(() => {
       <h1 class="text-2xl text-center">Paramètres</h1>
     </template>
     <template #content>
-      <div class="flex flex-col">
+      <div class="flex flex-col px-2">
         <div class="flex items-center">
           <p class="mr-2">Incertitudes</p>
           <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">

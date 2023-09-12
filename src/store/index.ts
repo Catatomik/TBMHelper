@@ -49,12 +49,14 @@ interface Settings {
   uncertainty: boolean;
   dates: boolean;
   delay: boolean;
+  schedules: boolean;
 }
 
 const defaultSettings: Settings = {
   uncertainty: false,
   dates: false,
   delay: false,
+  schedules: false,
 };
 
 function getNewTopZIndex() {

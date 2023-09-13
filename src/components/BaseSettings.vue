@@ -55,7 +55,7 @@ onUpdated(() => {
     <div
       ref="accordion"
       class="flex overflow-hidden transition-all duration-500 max-w-0 max-h-fit mx-2 my-2 whitespace-nowrap bg-slate-300 rounded-lg"
-      :class="{ 'max-w-full': shown }"
+      :class="{ 'max-w-full': shown, 'h-0': !shown }"
     >
       <div class="m-2">
         <div class="flex flex-col">

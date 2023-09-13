@@ -52,9 +52,13 @@ emit("update:checked", checked.value);
     </h4>
   </div>
   <div v-if="destSelect" class="mt-1">
-    <div v-for="destination in route.stopPointDetails.schedules.destinations" :key="destination" class="mt-1">
+    <div
+      v-for="destination in route.stopPointDetails.schedules.destinations"
+      :key="destination"
+      class="mt-1 w-fit"
+    >
       <span
-        class="dest rounded px-1"
+        class="flex items-center dest rounded px-1"
         :class="[
           route.stopPointDetails.schedules.destinations.length > 1
             ? `dest-${route.stopPointDetails.schedules.destinations.indexOf(destination).toLocaleString()}`
@@ -68,7 +72,9 @@ emit("update:checked", checked.value);
           @input="emit('update:checked', checked)"
         />
         <p v-else class="inline">➜</p>
-        {{ destination }}
+        <p class="inline ml-2">
+          {{ destination }}
+        </p>
       </span>
     </div>
   </div>

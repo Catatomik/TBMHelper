@@ -7,11 +7,11 @@ import type { OperatingRoute, RouteRealtimeInfos, VehicleJourneySchedule } from 
 
 export interface Modal {
   route: OperatingRoute;
-  trip: RouteRealtimeInfos<"TREATED">;
+  trip?: RouteRealtimeInfos<"TREATED">;
   journey: VehicleJourneySchedule<"TREATED">[];
   settings: Settings;
 }
-const props = defineProps<Modal>();
+defineProps<Modal>();
 
 const emit = defineEmits<{
   (e: "update:shown", shown: boolean): void;
@@ -63,14 +63,16 @@ onUpdated(async () => {
     <div class="mx-auto my-5 w-fit h-auto duration-300" @click="(e) => e.stopPropagation()">
       <div class="shadow-lg flex flex-col w-full h-full rounded-md bg-slate-100">
         <div class="flex flex-shrink-0 items-center justify-between pt-4 p-2 mx-2 border-b">
-          <RouteHeader :route="props.route"></RouteHeader>
+          <RouteHeader :route="route"></RouteHeader>
           <CloseButton class="ml-2 hover:scale-[110%] duration-300 justify-self-end" @click="show(false)" />
         </div>
         <div class="relative py-2 px-4 overflow-auto">
           <div
-            v-for="schedule of props.journey.filter(
-              (schedule) => schedule.departure_time - trip.departure_delay >= Date.now(),
-            )"
+            v-for="schedule of trip
+              ? journey.filter(
+                  (schedule) => schedule.departure_time - (trip?.departure_delay ?? 0) >= Date.now(),
+                )
+              : journey"
             :key="schedule.stop_point.id"
             class="flex bg-slate-200 my-1 rounded-sm p-1"
           >
@@ -78,19 +80,24 @@ onUpdated(async () => {
             <div
               class="ml-auto"
               :class="[
-                schedule.departure_time - trip.departure_delay - now < 3 * 60_000
+                Math.abs(schedule.departure_time - (trip?.departure_delay ?? 0) - now) < 3 * 60_000
                   ? 'text-red-500'
-                  : schedule.departure_time - trip.departure_delay - now < 5 * 60_000
+                  : Math.abs(schedule.departure_time - (trip?.departure_delay ?? 0) - now) < 5 * 60_000
                   ? 'text-orange-500'
-                  : schedule.departure_time - trip.departure_delay - now < 10 * 60_000
+                  : Math.abs(schedule.departure_time - (trip?.departure_delay ?? 0) - now) < 10 * 60_000
                   ? 'text-emerald-500'
                   : '',
               ]"
             >
               {{
-                props.settings.dates
-                  ? dateCompact(schedule.departure_time - trip.departure_delay)
-                  : duration(schedule.departure_time - trip.departure_delay - now, true, true) || "0s"
+                trip
+                  ? settings.dates
+                    ? dateCompact(schedule.departure_time - trip.departure_delay)
+                    : duration(schedule.departure_time - trip.departure_delay - now, true, true) || "0s"
+                  : settings.dates
+                  ? dateCompact(schedule.departure_time)
+                  : (schedule.departure_time - now < 0 ? "-" : "") +
+                      duration(schedule.departure_time - now, true, true) || "0s"
               }}
             </div>
           </div>

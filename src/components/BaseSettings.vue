@@ -55,13 +55,13 @@ onUpdated(() => {
     <div
       ref="accordion"
       class="flex overflow-hidden transition-all duration-500 max-w-0 max-h-fit mx-2 my-2 whitespace-nowrap bg-slate-300 rounded-lg"
-      :class="{ 'max-w-full': shown }"
+      :class="{ 'max-w-full': shown, 'h-0': !shown }"
     >
       <div class="m-2">
         <div class="flex flex-col">
           <div class="flex items-center">
             <p class="mr-2">Incertitudes</p>
-            <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">
+            <span class="flex items-center p-1 bg-slate-200 rounded-md">
               <input
                 v-model="settings.uncertainty"
                 type="checkbox"
@@ -71,14 +71,24 @@ onUpdated(() => {
           </div>
           <div class="flex items-center mt-1">
             <p class="mr-2">Affichage des dates</p>
-            <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">
+            <span class="flex items-center p-1 bg-slate-200 rounded-md">
               <input v-model="settings.dates" type="checkbox" @input="emit('update:modelValue', settings)" />
             </span>
           </div>
           <div class="flex items-center mt-1">
             <p class="mr-2">Affichage du retard</p>
-            <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">
+            <span class="flex items-center p-1 bg-slate-200 rounded-md">
               <input v-model="settings.delay" type="checkbox" @input="emit('update:modelValue', settings)" />
+            </span>
+          </div>
+          <div class="flex items-center mt-1">
+            <p class="mr-2">Horaires prévisionnels</p>
+            <span class="flex items-center p-1 bg-slate-200 rounded-md">
+              <input
+                v-model="settings.schedules"
+                type="checkbox"
+                @input="emit('update:modelValue', settings)"
+              />
             </span>
           </div>
         </div>
@@ -98,10 +108,10 @@ onUpdated(() => {
       <h1 class="text-2xl text-center">Paramètres</h1>
     </template>
     <template #content>
-      <div class="flex flex-col">
+      <div class="flex flex-col px-2">
         <div class="flex items-center">
           <p class="mr-2">Incertitudes</p>
-          <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">
+          <span class="flex items-center p-1 bg-slate-200 rounded-md">
             <input
               v-model="settings.uncertainty"
               type="checkbox"
@@ -111,14 +121,24 @@ onUpdated(() => {
         </div>
         <div class="flex items-center mt-1">
           <p class="mr-2">Affichage des dates</p>
-          <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">
+          <span class="flex items-center p-1 bg-slate-200 rounded-md">
             <input v-model="settings.dates" type="checkbox" @input="emit('update:modelValue', settings)" />
           </span>
         </div>
         <div class="flex items-center mt-1">
           <p class="mr-2">Affichage du retard</p>
-          <span class="align-middle p-1 px-2 bg-slate-200 rounded-md">
+          <span class="flex items-center p-1 bg-slate-200 rounded-md">
             <input v-model="settings.delay" type="checkbox" @input="emit('update:modelValue', settings)" />
+          </span>
+        </div>
+        <div class="flex items-center mt-1">
+          <p class="mr-2">Horaires prévisionnels</p>
+          <span class="flex items-center p-1 bg-slate-200 rounded-md">
+            <input
+              v-model="settings.schedules"
+              type="checkbox"
+              @input="emit('update:modelValue', settings)"
+            />
           </span>
         </div>
       </div>

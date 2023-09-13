@@ -56,7 +56,7 @@ onUpdated(async () => {
     @keyup.esc="show(false)"
     @click="show(false)"
   >
-    <div class="m-auto w-fit duration-300 min-w-[66%]" @click="(e) => e.stopPropagation()">
+    <div class="m-auto w-fit duration-300" @click="(e) => e.stopPropagation()">
       <div class="shadow-lg flex flex-col w-full rounded-md" :class="[bgColor]">
         <div class="flex flex-shrink-0 items-center justify-between py-4 px-2 mx-2 border-b">
           <slot name="title"></slot>

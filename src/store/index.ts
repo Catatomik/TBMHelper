@@ -12,7 +12,7 @@ enum FetchStatus {
  * @returns La durée formatée (YY?, MoMo?, DD?, HH?, MiMi?, SS? )
  */
 function duration(ms: number, includeSec = true, short = false): string {
-  ms = Math.sqrt(ms ** 2); //ensure positive value
+  ms = Math.abs(ms);
 
   const y = Math.floor(ms / 31556952000);
   ms -= y * 31556952000;
@@ -49,12 +49,14 @@ interface Settings {
   uncertainty: boolean;
   dates: boolean;
   delay: boolean;
+  schedules: boolean;
 }
 
 const defaultSettings: Settings = {
   uncertainty: false,
   dates: false,
   delay: false,
+  schedules: false,
 };
 
 function getNewTopZIndex() {

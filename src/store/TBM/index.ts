@@ -234,6 +234,7 @@ async function fetchRouteRealtime(
     )
   ).data as RouteRealtime<"RAW">;
   let waittime = Infinity;
+
   return {
     destinations: (Object.keys(result.destinations) as Array<keyof (typeof result)["destinations"]>).reduce(
       (acc, val) => [
@@ -245,6 +246,17 @@ async function fetchRouteRealtime(
               .match(/\d{2}/g)
               ?.reduce((acc, val, i) => acc + parseInt(val) * 60 ** (2 - i) * 1000, 0) || Infinity),
           departure_delay: Date.parse(rri.departure_theorique.replace(" ", "T")) - waittime - Date.now(),
+          destination_name:
+            Object.keys(stopPointDetails.schedules.datetimes)
+              .reduce(
+                (acc, v) => [...acc, ...stopPointDetails.schedules.datetimes[v]],
+                [] as Schedules["datetimes"][string],
+              )
+              .find(
+                (schedule) =>
+                  schedule.timestamp ===
+                  Math.round(new Date(rri.arrival_theorique.replace(" ", "T")).getTime() / 1000),
+              )?.directionName ?? "",
           fetched: Date.now(),
         })),
       ],

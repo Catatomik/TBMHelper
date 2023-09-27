@@ -27,7 +27,7 @@
     "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "@capacitor/assets": "^2.0.4",
+    "@capacitor/assets": "^3.0.0",
     "@capacitor/cli": "^5.4.1",
     "@rushstack/eslint-patch": "^1.4.0",
     "@types/node": "^17",

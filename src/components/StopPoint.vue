@@ -178,10 +178,10 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
         realtimeRoutesSchedules[routeId].route.fetch === FetchStatus.Errored
           ? 'errored'
           : realtimeRoutesSchedules[routeId].route.fetch === FetchStatus.Fetching
-          ? 'fetching'
-          : realtimeRoutesSchedules[routeId].route.fetch === FetchStatus.Fetched
-          ? 'fetched'
-          : '',
+            ? 'fetching'
+            : realtimeRoutesSchedules[routeId].route.fetch === FetchStatus.Fetched
+              ? 'fetched'
+              : '',
         'rounded-lg border-4 border-transparent',
       ]"
     >
@@ -271,10 +271,10 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
                 realtimeRoutesScheduleData.waittime < 3 * 60_000
                   ? 'text-red-500'
                   : realtimeRoutesScheduleData.waittime < 5 * 60_000
-                  ? 'text-orange-500'
-                  : realtimeRoutesScheduleData.waittime < 10 * 60_000
-                  ? 'text-emerald-500'
-                  : '',
+                    ? 'text-orange-500'
+                    : realtimeRoutesScheduleData.waittime < 10 * 60_000
+                      ? 'text-emerald-500'
+                      : '',
                 realtimeRoutesSchedules[routeId].route.stopPointDetails.schedules.destinations.length > 1
                   ? `dest-${
                       realtimeRoutesSchedules[routeId].route.stopPointDetails.schedules.destinations
@@ -302,8 +302,8 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
                 Math.abs(realtimeRoutesScheduleData.departure_delay) < 2.5 * 60_000
                   ? 'text-emerald-500'
                   : Math.abs(realtimeRoutesScheduleData.departure_delay) < 5 * 60_000
-                  ? 'text-orange-500'
-                  : 'text-red-500',
+                    ? 'text-orange-500'
+                    : 'text-red-500',
                 'inline bg-slate-300 rounded-md ml-1 px-1',
               ]"
             >
@@ -311,8 +311,8 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
                 (realtimeRoutesScheduleData.departure_delay > 0
                   ? "+"
                   : realtimeRoutesScheduleData.departure_delay < 0
-                  ? "-"
-                  : "") + (duration(realtimeRoutesScheduleData.departure_delay, true, true) || "0s")
+                    ? "-"
+                    : "") + (duration(realtimeRoutesScheduleData.departure_delay, true, true) || "0s")
               }}
             </span>
             <span v-if="settings.uncertainty" class="inline italic bg-slate-300 rounded-md ml-1 px-1">

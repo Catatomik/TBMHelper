@@ -83,10 +83,10 @@ onUpdated(async () => {
                 Math.abs(schedule.departure_time - (trip?.departure_delay ?? 0) - now) < 3 * 60_000
                   ? 'text-red-500'
                   : Math.abs(schedule.departure_time - (trip?.departure_delay ?? 0) - now) < 5 * 60_000
-                  ? 'text-orange-500'
-                  : Math.abs(schedule.departure_time - (trip?.departure_delay ?? 0) - now) < 10 * 60_000
-                  ? 'text-emerald-500'
-                  : '',
+                    ? 'text-orange-500'
+                    : Math.abs(schedule.departure_time - (trip?.departure_delay ?? 0) - now) < 10 * 60_000
+                      ? 'text-emerald-500'
+                      : '',
               ]"
             >
               {{
@@ -95,9 +95,9 @@ onUpdated(async () => {
                     ? dateCompact(schedule.departure_time - trip.departure_delay)
                     : duration(schedule.departure_time - trip.departure_delay - now, true, true) || "0s"
                   : settings.dates
-                  ? dateCompact(schedule.departure_time)
-                  : (schedule.departure_time - now < 0 ? "-" : "") +
-                      duration(schedule.departure_time - now, true, true) || "0s"
+                    ? dateCompact(schedule.departure_time)
+                    : (schedule.departure_time - now < 0 ? "-" : "") +
+                        duration(schedule.departure_time - now, true, true) || "0s"
               }}
             </div>
           </div>

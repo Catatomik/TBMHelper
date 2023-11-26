@@ -41,10 +41,10 @@ emit("update:checked", checked.value);
         route.stopPointDetails.route.line.type === "Bus Scolaire"
           ? "🚌"
           : route.stopPointDetails.route.line.type === "Tramway"
-          ? "🚋"
-          : route.stopPointDetails.route.line.type === "Train régional / TER"
-          ? "🚆"
-          : ""
+            ? "🚋"
+            : route.stopPointDetails.route.line.type === "Train régional / TER"
+              ? "🚆"
+              : ""
       }}
     </p>
     <h4 class="font-bold text-base py-1 inline align-middle">

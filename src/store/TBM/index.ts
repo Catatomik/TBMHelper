@@ -223,14 +223,14 @@ interface RouteRealtime<T extends RRIStats = "TREATED"> {
 
 async function fetchRouteRealtime(
   stopPointDetails: StopPointDetails,
-  lineDetails: LineDetails | { code: string },
+  lineDetails: LineDetails | { externalCode: string },
   route: Route,
 ): Promise<RouteRealtime | null> {
   const result = (
     await instance.get(
       `get-realtime-pass-by-id/${encodeURI(stopPointDetails.route.line.id)}/${encodeURI(
         stopPointDetails.id,
-      )}/${encodeURI(lineDetails.code)}/${encodeURI(route.id)}`,
+      )}/${encodeURI(lineDetails.externalCode)}/${encodeURI(route.id)}`,
     )
   ).data as RouteRealtime<"RAW">;
   let waittime = Infinity;

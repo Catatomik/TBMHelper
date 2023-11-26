@@ -51,7 +51,7 @@ props.stopPoint.routes.forEach(async (route) => {
     lineDetails:
       lineDetails == null
         ? {
-            code: extractLineCode(route.line) ?? "Will be errored if reached",
+            externalCode: extractLineCode(route.line) ?? "Will be errored if reached",
           }
         : lineDetails,
     fetch: FetchStatus.Fetching,

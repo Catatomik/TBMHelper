@@ -2,6 +2,7 @@
 import { onMounted, ref } from "vue";
 import { onBeforeRouteUpdate, useRoute } from "vue-router";
 import SettingsComp from "@/components/BaseSettings.vue";
+import StopAreaComp from "@/components/StopArea.vue";
 import { fetchStops } from "@/store/TBM";
 // May wait for settings & use loader instead
 import { fetchPaused, settings, updateStoredSettings } from "@/store/Storage";
@@ -88,27 +89,14 @@ async function addCurrentStop() {
       <h3 v-if="!getWantedStops(selectedStops).length" class="mt-5 text-center font-bold text-lg">
         Aucun arrêt sélectionné
       </h3>
-      <div v-else class="my-5 mx-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        <StopPointComp
-          v-for="stopPoint of getWantedStops(selectedStops)"
-          :key="stopPoint.id"
-          :stop-point="stopPoint"
-          :settings="settings"
-          @soft-delete="
-            removeStopPoint(
-              selectedStops.find((s) =>
-                s.details.stopPoints.find((sp) => sp.id === stopPoint.id),
-              ) as FullyDescribedStopArea,
-              stopPoint,
-            )
-          "
-          @hard-delete="
-            removeStop(
-              selectedStops.find((s) =>
-                s.details.stopPoints.find((sp) => sp.id === stopPoint.id),
-              ) as FullyDescribedStopArea,
-            )
-          "
+      <div v-else>
+        <StopAreaComp
+          v-for="stopArea of selectedStops.filter((stopArea) =>
+            getWantedStops(selectedStops).find(({ stopAreaId }) => stopAreaId === stopArea.id),
+          )"
+          :key="stopArea.id"
+          :stop-area="stopArea"
+          class="my-4 mx-2"
         />
       </div>
     </div>

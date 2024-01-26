@@ -41,21 +41,18 @@ props.stopPoint.routes.forEach(async (route) => {
   const stopPointDetails = await fetchStopPointDetails(route, props.stopPoint);
   if (!stopPointDetails) return;
 
-  const lineDetails = (
+  const lineDetails = ((
     ["Bus", "Bus Scolaire", "Bus de Nuit", "Tramway"] satisfies TBMLineType[] as lineType[]
   ).includes(stopPointDetails.route.line.type)
     ? await fetchLineDetails(route.line)
-    : null;
+    : null) ?? {
+    externalCode: extractLineCode(route.line) ?? "Will be errored if reached",
+  };
 
   refreshRouteRealtime({
     ...route,
     stopPointDetails,
-    lineDetails:
-      lineDetails == null
-        ? {
-            externalCode: extractLineCode(route.line) ?? "Will be errored if reached",
-          }
-        : lineDetails,
+    lineDetails,
     fetch: FetchStatus.Fetching,
   });
 });

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { OperatingRoute } from "@/store/TBM";
+import type { FullyDescribedRoute } from "@/store/TBM";
 import { ref, type Ref } from "vue";
 
 export interface RouteHeader {
-  route: OperatingRoute;
+  route: FullyDescribedRoute;
   destSelect?: boolean;
 }
 const props = withDefaults(defineProps<RouteHeader>(), {
@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<RouteHeader>(), {
 });
 
 export type Checked = Record<
-  OperatingRoute["stopPointDetails"]["schedules"]["destinations"][number],
+  FullyDescribedRoute["stopPointDetails"]["schedules"]["destinations"][number],
   boolean
 >;
 

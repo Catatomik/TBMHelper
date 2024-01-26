@@ -333,9 +333,10 @@ async function fetchVehicleJourney(
   }
 }
 
-type OperatingRoute = Route & { stopPointDetails: StopPointDetails } & {
+type FullyDescribedRoute = Route & { stopPointDetails: StopPointDetails } & {
   lineDetails: Parameters<typeof fetchRouteRealtime>[1];
-} & { fetch: FetchStatus };
+};
+type OperatingRoute = FullyDescribedRoute & { fetch: FetchStatus };
 
 export {
   fetchStops,
@@ -360,5 +361,6 @@ export type {
   RouteRealtimeInfos,
   Schedules,
   VehicleJourneySchedule,
+  FullyDescribedRoute,
   OperatingRoute,
 };

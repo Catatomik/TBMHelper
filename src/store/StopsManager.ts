@@ -42,14 +42,14 @@ async function queryUpdated(to: RouteLocationNormalized) {
       router.push({ query });
       continue;
     }
-    const fullyDescribedStop = await fetchStopAreaDetails(found);
-    if (!fullyDescribedStop) {
+    const fullyDescribedStopArea = await fetchStopAreaDetails(found);
+    if (!fullyDescribedStopArea) {
       delete query[k];
       queryInternallyUpdated = true;
       router.push({ query });
       continue;
     }
-    selectedStops.value = [...selectedStops.value, fullyDescribedStop];
+    selectedStops.value = [...selectedStops.value, fullyDescribedStopArea];
   }
 
   const providenStops = Object.keys(query).map((k) => query[k]);
@@ -110,10 +110,10 @@ function serializeExcludedStopPoints(excludedStopPoints: [StopArea["id"], StopPo
   return partialExcludedStopPoints.join(",");
 }
 
-async function addStop(stop: string) {
+async function addStopArea(stop: string) {
   const alreadySelected = selectedStops.value.find((s) => s.name === stop);
   if (alreadySelected) {
-    if (excludedStopPoints.value.find(([sp]) => sp === alreadySelected.id)) {
+    if (excludedStopPoints.value.find(([sa]) => sa === alreadySelected.id)) {
       excludedStopPoints.value = excludedStopPoints.value.filter(([sp]) => sp != alreadySelected.id);
       query["eSP"] = serializeExcludedStopPoints(excludedStopPoints.value);
       if (!query["eSP"].length) delete query["eSP"];
@@ -122,16 +122,21 @@ async function addStop(stop: string) {
       return 1;
     } else return -1; //display error
   }
+
   const found = stops.value.find((s) => s.name === stop);
   if (!found) return -2; // display error
-  const fullyDescribedStop = await fetchStopAreaDetails(found);
-  if (!fullyDescribedStop) return -3; // display error
 
-  query[Object.keys(query).length + 1] = fullyDescribedStop.name;
+  const fullyDescribedStopArea = await fetchStopAreaDetails(found);
+  if (!fullyDescribedStopArea) return -3; // display error
+
+  query[Object.keys(query).length + 1] = fullyDescribedStopArea.name;
   queryInternallyUpdated = true;
   router.push({ query });
 
-  selectedStops.value = [...selectedStops.value, fullyDescribedStop];
+  selectedStops.value.push(fullyDescribedStopArea);
+
+  return 0;
+}
 
   return 0;
 }
@@ -203,7 +208,7 @@ export {
   selectedStops,
   excludedStopPoints,
   stops,
-  addStop,
+  addStopArea,
   removeStopPoint,
   removeStopArea,
   queryUpdated,

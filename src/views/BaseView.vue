@@ -6,7 +6,7 @@ import { fetchStops } from "@/store/TBM";
 // May wait for settings & use loader instead
 import { fetchPaused, settings, updateStoredSettings } from "@/store/Storage";
 import {
-  addStop,
+  addStopArea,
   provideQuery,
   queryUpdated,
   selectedStops,
@@ -34,7 +34,7 @@ async function refreshStops() {
 }
 
 async function addCurrentStop() {
-  const r = await addStop(stopInput.value);
+  const r = await addStopArea(stopInput.value);
   if (r >= 0) {
     stopInput.value = "";
     if (r > 1) stops.value = [];

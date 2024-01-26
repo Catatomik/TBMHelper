@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { dateCompact, duration, type Settings, FetchStatus, now } from "@/store";
 import { ref } from "vue";
 import CustomButton from "@/components/CustomButton.vue";
 import RouteHeader, { type Checked } from "./RouteHeader.vue";
 import RealtimeJourneyModal, { type Modal as RealtimeJourneyModalProps } from "./JourneyModal.vue";
+import { dateCompact, duration, FetchStatus, now } from "@/store";
 import {
   type StopPoint,
   type Route,
@@ -17,6 +17,7 @@ import {
   type Schedules,
   fetchVehicleJourney,
   extractLineCode,
+  type StopArea,
   type TBMLineType,
   type lineType,
 } from "@/store/TBM";
@@ -114,6 +115,15 @@ function setRefreshRouteRealtime(route: OperatingRoute) {
   }, 10_000);
   if (realtimeRoutesSchedules.value[route.id]) realtimeRoutesSchedules.value[route.id].timeoutID = timeoutID;
 }
+
+function forceRefreshRouteRealtime(route: OperatingRoute) {
+  const timeoutID = realtimeRoutesSchedules.value[route.id]?.timeoutID;
+  if (timeoutID) clearTimeout(timeoutID);
+  refreshRouteRealtime(route, true);
+}
+
+function forceRefreshStopPointRealtime() {
+  Object.values(realtimeRoutesSchedules.value).forEach(({ route }) => forceRefreshRouteRealtime(route));
 }
 
 const journeyModalComp = ref<InstanceType<typeof RealtimeJourneyModal> | null>(null);
@@ -154,6 +164,10 @@ async function displayRealtimeSchedules(
 }
 
 const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
+
+defineExpose({
+  forceRefreshStopPointRealtime,
+});
 </script>
 
 <template>

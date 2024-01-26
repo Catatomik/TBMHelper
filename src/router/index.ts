@@ -4,7 +4,8 @@ import { createRouter, createWebHistory } from "vue-router";
 import { App, type URLOpenListenerEvent } from "@capacitor/app";
 import { Preferences } from "@capacitor/preferences";
 import BaseView from "../views/BaseView.vue";
-import { deserializeURL, preferencesKeys } from "@/store";
+import { deserializeURL } from "@/store";
+import { preferencesKeys } from "@/store/Storage";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

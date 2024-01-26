@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import router from "@/router";
-import { defaultSettings, preferencesKeys, unique, type Settings } from "@/store";
 import { onMounted, ref } from "vue";
 import { onBeforeRouteUpdate, useRoute } from "vue-router";
-import { Preferences } from "@capacitor/preferences";
-import StopPointComp from "@/components/StopPoint.vue";
 import SettingsComp from "@/components/BaseSettings.vue";
 import {
   type FullyDescribedStopArea,
@@ -16,9 +12,6 @@ import {
 
 const showSettingsButton = ref<HTMLButtonElement | null>(null);
 const settingsComp = ref<InstanceType<typeof SettingsComp> | null>(null);
-
-// May wait for settings & use loader instead
-const settings = ref<Settings>({ ...defaultSettings });
 
 const route = useRoute();
 let query = { ...route.query };

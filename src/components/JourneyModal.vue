@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { onMounted, onUpdated, ref } from "vue";
-import { dateCompact, duration, getNewTopZIndex, now, type Settings } from "@/store";
+import { dateCompact, duration, getNewTopZIndex, now } from "@/store";
 import CustomButton from "./CustomButton.vue";
 import RouteHeader from "./RouteHeader.vue";
 import type { OperatingRoute, RouteRealtimeInfos, VehicleJourneySchedule } from "@/store/TBM";
+import { settings } from "@/store/Storage";
 import { Button } from "@/store/Buttons";
 
 export interface Modal {
   route: OperatingRoute;
   trip?: RouteRealtimeInfos<"TREATED">;
   journey: VehicleJourneySchedule<"TREATED">[];
-  settings: Settings;
 }
 defineProps<Modal>();
 

@@ -20,10 +20,10 @@ import {
   type lineType,
 } from "@/store/TBM";
 import { Button } from "@/store/Buttons";
+import { paused, settings } from "@/store/Storage";
 
 interface Props {
-  stopPoint: StopPoint;
-  settings: Settings;
+  stopPoint: StopPoint & { stopAreaId: StopArea["id"] };
 }
 const props = defineProps<Props>();
 
@@ -33,7 +33,7 @@ const emit = defineEmits<{
 }>();
 
 const realtimeRoutesSchedules = ref<{
-  [x: Route["id"]]: RouteRealtime & { route: OperatingRoute };
+  [x: Route["id"]]: RouteRealtime & { route: OperatingRoute } & { timeoutID: number | null };
 }>({});
 
 props.stopPoint.routes.forEach(async (route) => {
@@ -59,7 +59,23 @@ props.stopPoint.routes.forEach(async (route) => {
   });
 });
 
-function refreshRouteRealtime(route: OperatingRoute) {
+function isPaused() {
+  return paused.value.includes(props.stopPoint.id) || paused.value.includes(props.stopPoint.stopAreaId);
+}
+
+function refreshRouteRealtime(route: OperatingRoute, force = false) {
+  if (isPaused() && !force) {
+    if (!realtimeRoutesSchedules.value[route.id]) {
+      route.fetch = FetchStatus.Errored;
+      realtimeRoutesSchedules.value[route.id] = {
+        destinations: [],
+        route,
+        timeoutID: null,
+      };
+    }
+    return setRefreshRouteRealtime(route);
+  }
+
   route.fetch = FetchStatus.Fetching;
   fetchRouteRealtime(route.stopPointDetails, route.lineDetails, route)
     .then((r) => {
@@ -69,6 +85,7 @@ function refreshRouteRealtime(route: OperatingRoute) {
         realtimeRoutesSchedules.value[route.id] = {
           destinations: r.destinations.sort((a, b) => a.waittime - b.waittime),
           route,
+          timeoutID: null,
         };
         if (
           journeyModalComp.value?.shown &&
@@ -82,17 +99,21 @@ function refreshRouteRealtime(route: OperatingRoute) {
             realtimeSchedulesData.value.trip = RRI;
           }
         }
-      } else realtimeRoutesSchedules.value[route.id] = { destinations: [], route };
+      } else realtimeRoutesSchedules.value[route.id] = { destinations: [], route, timeoutID: null };
     })
     .catch((_) => {
       route.fetch = FetchStatus.Errored;
-      realtimeRoutesSchedules.value[route.id] = { destinations: [], route };
+      realtimeRoutesSchedules.value[route.id] = { destinations: [], route, timeoutID: null };
     })
-    .finally(() => {
-      setTimeout(() => {
-        refreshRouteRealtime(route);
-      }, 10_000);
-    });
+    .finally(() => setRefreshRouteRealtime(route));
+}
+
+function setRefreshRouteRealtime(route: OperatingRoute) {
+  const timeoutID = setTimeout(() => {
+    refreshRouteRealtime(route);
+  }, 10_000);
+  if (realtimeRoutesSchedules.value[route.id]) realtimeRoutesSchedules.value[route.id].timeoutID = timeoutID;
+}
 }
 
 const journeyModalComp = ref<InstanceType<typeof RealtimeJourneyModal> | null>(null);
@@ -158,7 +179,6 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
       :route="realtimeSchedulesData.route"
       :trip="realtimeSchedulesData.trip"
       :journey="realtimeSchedulesData.journey"
-      :settings="settings"
     ></RealtimeJourneyModal>
     <hr class="my-2" />
     <p
@@ -169,7 +189,7 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
       "
       class="text-red-700"
     >
-      Impossible de récupérer les horaires de cet arrêt
+      {{ isPaused() ? "Rafraîchissement en pause" : "Impossible de récupérer les horaires de cet arrêt" }}
     </p>
     <div
       v-for="routeId of (

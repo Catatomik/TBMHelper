@@ -45,20 +45,6 @@ function unique<T>(v: T, i: number, arr: T[]): boolean {
   return arr.indexOf(v) === i;
 }
 
-interface Settings {
-  uncertainty: boolean;
-  dates: boolean;
-  delay: boolean;
-  schedules: boolean;
-}
-
-const defaultSettings: Settings = {
-  uncertainty: false,
-  dates: false,
-  delay: false,
-  schedules: false,
-};
-
 function getNewTopZIndex() {
   let max = 0;
   for (const el of document.querySelectorAll("body *")) {
@@ -82,11 +68,6 @@ function dateCompact(date: string | number | Date) {
     deltaD > 0 ? (deltaD === 1 ? "demain, " : deltaD === 2 ? "après-demain, " : `dans ${deltaD} jours, `) : ""
   }${h}:${m}:${s}`;
 }
-
-const preferencesKeys = {
-  settings: "settings",
-  location: "location",
-};
 
 interface DeserializedURL {
   hash: string | undefined;

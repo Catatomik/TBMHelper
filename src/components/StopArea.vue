@@ -76,7 +76,8 @@ async function getExcludedStopPoints() {
     },
   );
 
-  if (!excludedStopPoints.value.length && restoreStopComp.value?.shown) restoreStopComp.value.show(false);
+  if (!excludedStopPointsToRestore.value.length && restoreStopComp.value?.shown)
+    restoreStopComp.value.show(false);
 }
 
 watch(excludedStopPoints, getExcludedStopPoints);

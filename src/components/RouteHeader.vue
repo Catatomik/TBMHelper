@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import RouteName from "./RouteName.vue";
 import type { FullyDescribedRoute } from "@/store/TBM";
 import { ref, type Ref } from "vue";
 
@@ -27,31 +28,7 @@ emit("update:checked", checked.value);
 </script>
 
 <template>
-  <div>
-    <img
-      v-if="'id' in route.lineDetails"
-      width="25"
-      class="inline align-middle"
-      :src="route.lineDetails.picto"
-    />
-    <p class="mx-1 inline align-middle">
-      {{
-        route.stopPointDetails.route.line.type === "Bus" ||
-        route.stopPointDetails.route.line.type === "Autocar" ||
-        route.stopPointDetails.route.line.type === "Bus de Nuit" ||
-        route.stopPointDetails.route.line.type === "Bus Scolaire"
-          ? "🚌"
-          : route.stopPointDetails.route.line.type === "Tramway"
-            ? "🚊"
-            : route.stopPointDetails.route.line.type === "Train régional / TER"
-              ? "🚆"
-              : ""
-      }}
-    </p>
-    <h4 class="font-bold text-base py-1 inline align-middle">
-      {{ route.line.name }}
-    </h4>
-  </div>
+  <RouteName :route="route" />
   <div v-if="destSelect" class="mt-1">
     <div
       v-for="destination in route.stopPointDetails.schedules.destinations"

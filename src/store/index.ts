@@ -101,16 +101,11 @@ setInterval(() => {
   now.value = Date.now();
 }, 1000);
 
-export {
-  FetchStatus,
-  duration,
-  unique,
-  defaultSettings,
-  getNewTopZIndex,
-  dateCompact,
-  preferencesKeys,
-  deserializeURL,
-  now,
-};
+async function mapAsync<I, O>(
+  array: I[],
+  callback: (value: I, index: number, array: I[]) => Promise<O>,
+): Promise<O[]> {
+  return await Promise.all(array.map(callback));
+}
 
-export type { Settings };
+export { FetchStatus, duration, unique, getNewTopZIndex, dateCompact, deserializeURL, now, mapAsync };

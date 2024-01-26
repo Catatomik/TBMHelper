@@ -157,7 +157,7 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
 </script>
 
 <template>
-  <div class="rounded-lg bg-slate-100 p-3 shadow-xl">
+  <div class="rounded-lg bg-slate-200 p-3 shadow-xl">
     <div class="flex items-center">
       <CustomButton
         :button="Button.Refresh"
@@ -165,6 +165,7 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
         :fill-color="'fill-violet-500'"
         @click="forceRefreshStopPointRealtime()"
       />
+      <h3 class="text-center font-bold text-lg mx-auto">🚏 {{ stopPoint.name }}</h3>
       <CustomButton
         :button="Button.Close"
         :border-color="'border-orange-400'"
@@ -179,7 +180,7 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
       :trip="realtimeSchedulesData.trip"
       :journey="realtimeSchedulesData.journey"
     ></RealtimeJourneyModal>
-    <hr class="my-2" />
+    <hr class="my-2 border-slate-300" />
     <p
       v-if="
         Object.values(realtimeRoutesSchedules).every(

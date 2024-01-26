@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { dateCompact, duration, type Settings, FetchStatus, now } from "@/store";
 import { ref } from "vue";
-import CloseButton from "@/components/CloseButton.vue";
+import CustomButton from "@/components/CustomButton.vue";
 import RouteHeader, { type Checked } from "./RouteHeader.vue";
 import RealtimeJourneyModal, { type Modal as RealtimeJourneyModalProps } from "./JourneyModal.vue";
 import {
@@ -19,6 +19,7 @@ import {
   extractLineCode,
   type lineType,
 } from "@/store/TBM";
+import { Button } from "@/store/Buttons";
 
 interface Props {
   stopPoint: StopPoint;
@@ -137,8 +138,14 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
 <template>
   <div class="rounded-lg bg-slate-100 p-3 shadow-xl">
     <div class="flex items-center">
-      <h3 class="text-center font-bold text-lg mx-auto">📍 {{ stopPoint.name }}</h3>
-      <CloseButton
+      <CustomButton
+        :button="Button.Refresh"
+        :border-color="'border-violet-500'"
+        :fill-color="'fill-violet-500'"
+        @click="forceRefreshStopPointRealtime()"
+      />
+      <CustomButton
+        :button="Button.Close"
         :border-color="'border-orange-400'"
         :fill-color="'fill-orange-400'"
         @click="emit('softDelete')"

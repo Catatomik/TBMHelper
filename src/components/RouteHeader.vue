@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import RouteName from "./RouteName.vue";
 import type { FullyDescribedRoute } from "@/store/TBM";
-import { ref, type Ref } from "vue";
+import { ref } from "vue";
 
 export interface RouteHeader {
   route: FullyDescribedRoute;
@@ -13,7 +13,7 @@ export type Checked = Record<
   boolean
 >;
 
-const checked: Ref<Checked> = ref(
+const checked = ref<Checked>(
   props.route.stopPointDetails.schedules.destinations.reduce((acc, v) => ({ ...acc, [v]: true }), {}),
 );
 

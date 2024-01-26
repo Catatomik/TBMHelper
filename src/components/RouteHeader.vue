@@ -42,7 +42,7 @@ emit("update:checked", checked.value);
         route.stopPointDetails.route.line.type === "Bus Scolaire"
           ? "🚌"
           : route.stopPointDetails.route.line.type === "Tramway"
-            ? "🚋"
+            ? "🚊"
             : route.stopPointDetails.route.line.type === "Train régional / TER"
               ? "🚆"
               : ""

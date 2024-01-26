@@ -134,7 +134,8 @@ async function fetchStopPointDetails(route: Route, stop: StopPoint): Promise<Sto
   }
 }
 
-type lineType = "Bus" | "Bus Scolaire" | "Tramway" | "Train régional / TER" | "Autocar";
+type lineType = "Bus" | "Bus Scolaire" | "Bus de Nuit" | "Tramway" | "Train régional / TER" | "Autocar";
+type TBMLineType = Extract<lineType, "Bus" | "Bus Scolaire" | "Bus de Nuit" | "Tramway">;
 
 interface LineDetails {
   code: string;
@@ -351,6 +352,7 @@ export type {
   StopPoint,
   StopPointDetails,
   lineType,
+  TBMLineType,
   LineDetails,
   Route,
   FullyDescribedStopArea,

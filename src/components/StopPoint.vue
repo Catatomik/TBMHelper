@@ -17,6 +17,7 @@ import {
   type Schedules,
   fetchVehicleJourney,
   extractLineCode,
+  type TBMLineType,
   type lineType,
 } from "@/store/TBM";
 import { Button } from "@/store/Buttons";
@@ -40,9 +41,9 @@ props.stopPoint.routes.forEach(async (route) => {
   const stopPointDetails = await fetchStopPointDetails(route, props.stopPoint);
   if (!stopPointDetails) return;
 
-  const lineDetails = (["Bus", "Bus Scolaire", "Tramway"] as lineType[]).includes(
-    stopPointDetails.route.line.type,
-  )
+  const lineDetails = (
+    ["Bus", "Bus Scolaire", "Bus de Nuit", "Tramway"] satisfies TBMLineType[] as lineType[]
+  ).includes(stopPointDetails.route.line.type)
     ? await fetchLineDetails(route.line)
     : null;
 

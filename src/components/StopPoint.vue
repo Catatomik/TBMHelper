@@ -29,8 +29,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: "softDelete"): void;
-  (e: "hardDelete"): void;
+  (e: "delete"): void;
 }>();
 
 const realtimeRoutesSchedules = ref<{
@@ -170,9 +169,8 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
         :button="Button.Close"
         :border-color="'border-orange-400'"
         :fill-color="'fill-orange-400'"
-        @click="emit('softDelete')"
+        @click="emit('delete')"
       />
-      <CloseButton class="ml-2" @click="emit('hardDelete')" />
     </div>
     <RealtimeJourneyModal
       v-if="realtimeSchedulesData"

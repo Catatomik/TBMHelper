@@ -138,6 +138,24 @@ async function addStopArea(stop: string) {
   return 0;
 }
 
+async function addStopPoint(stopArea: StopArea, stopPointId: StopPoint["id"]) {
+  if (excludedStopPoints.value.find(([_, sp]) => sp === stopPointId)) {
+    excludedStopPoints.value = excludedStopPoints.value.filter(([_, sp]) => sp != stopPointId);
+    query["eSP"] = serializeExcludedStopPoints(excludedStopPoints.value);
+    if (!query["eSP"].length) delete query["eSP"];
+    queryInternallyUpdated = true;
+    router.push({ query });
+    return 1;
+  }
+
+  const fullyDescribedStopArea = await fetchStopAreaDetails(stopArea);
+  if (!fullyDescribedStopArea) return -3; // display error
+
+  for (const stopPoint of fullyDescribedStopArea.details.stopPoints)
+    excludedStopPoints.value.push([stopArea.id, stopPoint.id]);
+
+  selectedStops.value.push(fullyDescribedStopArea);
+
   return 0;
 }
 
@@ -209,6 +227,7 @@ export {
   excludedStopPoints,
   stops,
   addStopArea,
+  addStopPoint,
   removeStopPoint,
   removeStopArea,
   queryUpdated,

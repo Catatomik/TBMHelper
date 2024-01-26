@@ -108,7 +108,7 @@ watch(excludedStopPoints, getExcludedStopPoints);
         v-else
         :button="Button.Pause"
         :border-color="'border-blue-500'"
-        :fill-color="'fill-orange-500'"
+        :fill-color="'fill-yellow-500'"
         class="ml-2"
         @click="
           paused.push(stopArea.id);

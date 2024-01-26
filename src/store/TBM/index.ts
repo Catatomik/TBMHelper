@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { FetchStatus } from "..";
+import { ref } from "vue";
 
 const instance = axios.create({
   baseURL: "https://ws.infotbm.com/ws/1.0/",
@@ -61,10 +62,15 @@ interface StopAreaDetails {
 
 type FullyDescribedStopArea = StopArea & { details: StopAreaDetails };
 
-async function fetchStopAreaDetails(stop: StopArea): Promise<FullyDescribedStopArea | null> {
+async function fetchStopAreaDetails(stopArea: StopArea): Promise<FullyDescribedStopArea | null> {
+  if (TBMCache.value[`${stopArea.id}-full`]) return TBMCache.value[`${stopArea.id}-full`];
+
   try {
-    const details = (await instance.get(`network/stoparea-informations/${encodeURI(stop.id)}`))
-      .data as StopAreaDetails;
+    const details: StopAreaDetails =
+      TBMCache.value[`${stopArea.id}-details`] ??
+      (TBMCache.value[`${stopArea.id}-details`] = (
+        await instance.get(`network/stoparea-informations/${encodeURI(stopArea.id)}`)
+      ).data);
     if (!details) return null;
     details.stopPoints = details.stopPoints.filter((sp, _, arr) =>
       sp.routes.some(
@@ -87,10 +93,11 @@ async function fetchStopAreaDetails(stop: StopArea): Promise<FullyDescribedStopA
             ),
         )),
     );
-    return {
-      ...stop,
+
+    return (TBMCache.value[`${stopArea.id}-full`] = {
+      ...stopArea,
       details,
-    };
+    });
   } catch (_) {
     return null;
   }
@@ -125,10 +132,14 @@ interface StopPointDetails {
   stopAreaId: `stop_area:${string}`;
 }
 
-async function fetchStopPointDetails(route: Route, stop: StopPoint): Promise<StopPointDetails | null> {
+async function fetchStopPointDetails(route: Route, stopPoint: StopPoint): Promise<StopPointDetails | null> {
   try {
-    return (await instance.get(`stop-points-informations/${encodeURI(route.id)}/${encodeURI(stop.id)}`))
-      .data as StopPointDetails;
+    return (
+      TBMCache.value[`${stopPoint.id}-details`] ??
+      (TBMCache.value[`${stopPoint.id}-details`] = (
+        await instance.get(`stop-points-informations/${encodeURI(route.id)}/${encodeURI(stopPoint.id)}`)
+      ).data)
+    );
   } catch (_) {
     return null;
   }
@@ -141,7 +152,7 @@ interface LineDetails {
   code: string;
   color: string;
   externalCode: string;
-  id: `line:${string}`;
+  id: lineId;
   name: string;
   picto: string; // URL
   pictoCrossed: string;
@@ -177,8 +188,12 @@ function extractLineCode(line: Line) {
 
 async function fetchLineDetails(line: Line): Promise<LineDetails | null> {
   try {
-    return (await instance.get(`network/line-informations/${encodeURI(extractLineCode(line) || "")}`))
-      .data as LineDetails;
+    return (
+      TBMCache.value[`${line.id}-details`] ??
+      (TBMCache.value[`${line.id}-details`] = (
+        await instance.get(`network/line-informations/${encodeURI(extractLineCode(line) || "")}`)
+      ).data)
+    );
   } catch (_) {
     return null;
   }
@@ -338,6 +353,14 @@ type FullyDescribedRoute = Route & { stopPointDetails: StopPointDetails } & {
 };
 type OperatingRoute = FullyDescribedRoute & { fetch: FetchStatus };
 
+const TBMCache = ref<
+  { [x: `${StopAreaDetails["id"]}-details`]: StopAreaDetails } & {
+    [x: `${StopArea["id"]}-full`]: FullyDescribedStopArea;
+  } & { [x: `${StopPoint["id"]}-details`]: StopPointDetails } & {
+    [x: `${Line["id"]}-details`]: LineDetails;
+  }
+>({});
+
 export {
   fetchStops,
   fetchStopAreaDetails,
@@ -346,6 +369,7 @@ export {
   fetchLineDetails,
   fetchRouteRealtime,
   fetchVehicleJourney,
+  TBMCache,
 };
 
 export type {

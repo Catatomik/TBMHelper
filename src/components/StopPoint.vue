@@ -225,7 +225,6 @@ defineExpose({
     >
       <RouteHeader
         :route="realtimeRoutesSchedules[routeId].route"
-        :dest-select="true"
         @update:checked="(checked) => (destShown[routeId] = checked)"
       ></RouteHeader>
       <p v-if="realtimeRoutesSchedules[routeId].route.fetch === FetchStatus.Errored" class="text-red-700">

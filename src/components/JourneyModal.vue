@@ -2,7 +2,7 @@
 import { onMounted, onUpdated, ref } from "vue";
 import { dateCompact, duration, getNewTopZIndex, now } from "@/store";
 import CustomButton from "./CustomButton.vue";
-import RouteHeader from "./RouteHeader.vue";
+import RouteName from "./RouteName.vue";
 import type { OperatingRoute, RouteRealtimeInfos, VehicleJourneySchedule } from "@/store/TBM";
 import { settings } from "@/store/Storage";
 import { Button } from "@/store/Buttons";
@@ -64,7 +64,7 @@ onUpdated(async () => {
     <div class="mx-auto my-5 w-fit h-auto duration-300" @click="(e) => e.stopPropagation()">
       <div class="shadow-lg flex flex-col w-full h-full rounded-md bg-slate-100">
         <div class="flex flex-shrink-0 items-center justify-between pt-4 p-2 mx-2 border-b">
-          <RouteHeader :route="route"></RouteHeader>
+          <RouteName :route="route"></RouteName>
           <CustomButton
             :button="Button.Close"
             :border-color="'border-red-500'"

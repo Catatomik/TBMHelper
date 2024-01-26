@@ -5,11 +5,8 @@ import { ref, type Ref } from "vue";
 
 export interface RouteHeader {
   route: FullyDescribedRoute;
-  destSelect?: boolean;
 }
-const props = withDefaults(defineProps<RouteHeader>(), {
-  destSelect: false,
-});
+const props = defineProps<RouteHeader>();
 
 export type Checked = Record<
   FullyDescribedRoute["stopPointDetails"]["schedules"]["destinations"][number],
@@ -29,7 +26,7 @@ emit("update:checked", checked.value);
 
 <template>
   <RouteName :route="route" />
-  <div v-if="destSelect" class="mt-1">
+  <div class="mt-1">
     <div
       v-for="destination in route.stopPointDetails.schedules.destinations"
       :key="destination"

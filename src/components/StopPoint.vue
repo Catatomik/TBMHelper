@@ -22,7 +22,7 @@ import {
   type lineType,
 } from "@/store/TBM";
 import { Button } from "@/store/Buttons";
-import { paused, settings } from "@/store/Storage";
+import { minimized, paused, settings } from "@/store/Storage";
 
 interface Props {
   stopPoint: StopPoint & { stopAreaId: StopArea["id"] };
@@ -62,7 +62,7 @@ function isPaused() {
 }
 
 function refreshRouteRealtime(route: OperatingRoute, force = false) {
-  if (isPaused() && !force) {
+  if ((isPaused() && !force) || minimized.value.includes(props.stopPoint.stopAreaId)) {
     if (!realtimeRoutesSchedules.value[route.id]) {
       route.fetch = FetchStatus.Errored;
       realtimeRoutesSchedules.value[route.id] = {

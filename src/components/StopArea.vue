@@ -3,8 +3,16 @@ import BaseModal from "./BaseModal.vue";
 import CustomButton from "./CustomButton.vue";
 import { Button } from "@/store/Buttons";
 import StopPointComp from "./StopPoint.vue";
+import {
+  fetchMinimized,
+  setMinimized,
+  setUnminimized,
+  minimized,
+  paused,
+  settings,
   setPaused,
   setUnpaused,
+} from "@/store/Storage";
 import {
   addStopPoint,
   removeStopPoint,
@@ -82,26 +90,30 @@ async function getExcludedStopPoints() {
 }
 
 watch(excludedStopPoints, getExcludedStopPoints);
+
+fetchMinimized();
 </script>
 
 <template>
   <div class="bg-slate-100 rounded-lg shadow-xl py-2">
     <div class="flex items-center mx-2">
+      <span class="flex" :disabled-load="minimized.includes(stopArea.id)">
+        <CustomButton
+          :button="Button.Refresh"
+          :border-color="'border-violet-500'"
+          :fill-color="'fill-violet-500'"
+          @click="forceRefreshStopAreaRealtime"
+        />
+      </span>
       <CustomButton
-        :button="Button.Refresh"
-        :border-color="'border-violet-500'"
-        :fill-color="'fill-violet-500'"
-        @click="forceRefreshStopAreaRealtime"
-      />
-      <CustomButton
-        v-if="paused.includes(stopArea.id)"
+        v-if="paused.includes(stopArea.id) && !minimized.includes(stopArea.id)"
         :button="Button.Play"
         :border-color="'border-blue-500'"
         :fill-color="'fill-green-500'"
         class="ml-2"
         @click="
           setUnpaused(stopArea.id);
-          updateStoredPaused();
+          setUnminimized(stopArea.id);
           forceRefreshStopAreaRealtime();
         "
       />
@@ -111,12 +123,15 @@ watch(excludedStopPoints, getExcludedStopPoints);
         :border-color="'border-blue-500'"
         :fill-color="'fill-yellow-500'"
         class="ml-2"
-        @click="
-          paused.push(stopArea.id);
-          updateStoredPaused();
-        "
+        @click="setPaused(stopArea.id)"
       />
-      <h2 class="text-center font-bold text-lg mx-auto">
+      <h2
+        class="grow text-center font-bold text-lg mx-auto"
+        @click="
+          if (minimized.includes(stopArea.id)) setUnminimized(stopArea.id);
+          else setMinimized(stopArea.id);
+        "
+      >
         📍
         {{ stopArea.name }}
       </h2>
@@ -135,17 +150,25 @@ watch(excludedStopPoints, getExcludedStopPoints);
         @click="removeStopArea(stopArea)"
       />
     </div>
-    <div class="my-3 mx-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      <StopPointComp
-        v-for="stopPoint of getWantedStops(selectedStops).filter(
-          (stopPoint) => stopPoint.stopAreaId === stopArea.id,
-        )"
-        :key="stopPoint.id"
-        ref="stopPointComps"
-        :stop-point="stopPoint"
-        :settings="settings"
-        @delete="removeStopPoint(stopArea, stopPoint)"
-      />
+    <div
+      class="grid transition-[grid-template-rows] duration-700"
+      :class="minimized.includes(stopArea.id) ? ['grid-rows-[0fr]'] : ['grid-rows-[1fr]']"
+    >
+      <div
+        class="mx-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-hidden transition-[margin] duration-1000"
+        :class="minimized.includes(stopArea.id) ? ['my-0'] : ['my-3']"
+      >
+        <StopPointComp
+          v-for="stopPoint of getWantedStops(selectedStops).filter(
+            (stopPoint) => stopPoint.stopAreaId === stopArea.id,
+          )"
+          :key="stopPoint.id"
+          ref="stopPointComps"
+          :stop-point="stopPoint"
+          :settings="settings"
+          @delete="removeStopPoint(stopArea, stopPoint)"
+        />
+      </div>
     </div>
 
     <BaseModal
@@ -188,3 +211,22 @@ watch(excludedStopPoints, getExcludedStopPoints);
     </BaseModal>
   </div>
 </template>
+
+<style>
+.disabled-load-wrapper {
+  @apply opacity-70 !important;
+  @apply cursor-not-allowed !important;
+}
+
+.disabled-load {
+  pointer-events: none !important;
+}
+
+[disabled-load="true"] {
+  @apply disabled-load-wrapper;
+}
+
+[disabled-load="true"] * {
+  @apply disabled-load;
+}
+</style>

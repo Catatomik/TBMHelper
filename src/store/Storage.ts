@@ -1,11 +1,13 @@
 import { Preferences } from "@capacitor/preferences";
 import { ref } from "vue";
 import type { StopArea, StopPoint } from "./TBM";
+import { Deferred } from ".";
 
 const preferencesKeys = {
   settings: "settings",
   location: "location",
   paused: "paused",
+  minimized: "mini",
 };
 
 interface Settings {
@@ -43,9 +45,13 @@ async function fetchSettings() {
 const paused = ref<(StopPoint["id"] | StopArea["id"])[]>([]);
 
 function updateStoredPaused() {
-  setTimeout(() => {
-    Preferences.set({ key: preferencesKeys.paused, value: JSON.stringify(paused.value) });
+  const def = new Deferred<void>();
+
+  setTimeout(async () => {
+    def.resolve(await Preferences.set({ key: preferencesKeys.paused, value: JSON.stringify(paused.value) }));
   }, 50);
+
+  return def.promise;
 }
 
 async function fetchPaused() {
@@ -68,6 +74,40 @@ function setUnpaused(s: StopPoint["id"] | StopArea["id"]) {
   if (len !== paused.value.length) return updateStoredPaused();
 }
 
+const minimized = ref<StopArea["id"][]>([]);
+
+function updateStoredMinimized() {
+  const def = new Deferred<void>();
+
+  setTimeout(async () => {
+    def.resolve(
+      await Preferences.set({ key: preferencesKeys.minimized, value: JSON.stringify(minimized.value) }),
+    );
+  }, 50);
+
+  return def.promise;
+}
+
+async function fetchMinimized() {
+  const { value } = await Preferences.get({ key: preferencesKeys.minimized });
+  if (value) {
+    minimized.value = JSON.parse(value);
+    return true;
+  }
+
+  return false;
+}
+
+function setMinimized(sa: StopArea["id"]) {
+  if (minimized.value.length === minimized.value.push(sa)) return updateStoredMinimized();
+}
+
+function setUnminimized(sa: StopArea["id"]) {
+  const len = minimized.value.length;
+  minimized.value = minimized.value.filter((p) => p !== sa);
+  if (len !== minimized.value.length) return updateStoredMinimized();
+}
+
 export {
   defaultSettings,
   preferencesKeys,
@@ -77,6 +117,13 @@ export {
   paused,
   updateStoredPaused,
   fetchPaused,
+  setPaused,
+  setUnpaused,
+  minimized,
+  updateStoredMinimized,
+  fetchMinimized,
+  setMinimized,
+  setUnminimized,
 };
 
 export type { Settings };

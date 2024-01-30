@@ -108,4 +108,30 @@ async function mapAsync<I, O>(
   return await Promise.all(array.map(callback));
 }
 
-export { FetchStatus, duration, unique, getNewTopZIndex, dateCompact, deserializeURL, now, mapAsync };
+type resolveCb<T = void> = (value: T) => void;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type rejectCb = (reason?: any) => void;
+class Deferred<T = unknown> {
+  public promise: Promise<T>;
+  public resolve!: resolveCb<T>;
+  public reject!: rejectCb;
+
+  constructor() {
+    this.promise = new Promise<T>((resolve, reject) => {
+      this.reject = reject;
+      this.resolve = resolve;
+    });
+  }
+}
+
+export {
+  FetchStatus,
+  duration,
+  unique,
+  getNewTopZIndex,
+  dateCompact,
+  deserializeURL,
+  now,
+  mapAsync,
+  Deferred,
+};

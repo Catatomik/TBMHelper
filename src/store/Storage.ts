@@ -58,6 +58,16 @@ async function fetchPaused() {
   return false;
 }
 
+function setPaused(s: StopPoint["id"] | StopArea["id"]) {
+  if (paused.value.length === paused.value.push(s)) return updateStoredPaused();
+}
+
+function setUnpaused(s: StopPoint["id"] | StopArea["id"]) {
+  const len = paused.value.length;
+  paused.value = paused.value.filter((p) => p !== s);
+  if (len !== paused.value.length) return updateStoredPaused();
+}
+
 export {
   defaultSettings,
   preferencesKeys,

@@ -3,7 +3,8 @@ import BaseModal from "./BaseModal.vue";
 import CustomButton from "./CustomButton.vue";
 import { Button } from "@/store/Buttons";
 import StopPointComp from "./StopPoint.vue";
-import { paused, settings, updateStoredPaused } from "@/store/Storage";
+  setPaused,
+  setUnpaused,
 import {
   addStopPoint,
   removeStopPoint,
@@ -99,7 +100,7 @@ watch(excludedStopPoints, getExcludedStopPoints);
         :fill-color="'fill-green-500'"
         class="ml-2"
         @click="
-          paused = paused.filter((p) => p !== stopArea.id);
+          setUnpaused(stopArea.id);
           updateStoredPaused();
           forceRefreshStopAreaRealtime();
         "

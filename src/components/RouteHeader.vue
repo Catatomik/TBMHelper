@@ -1,21 +1,19 @@
 <script setup lang="ts">
-import type { OperatingRoute } from "@/store/TBM";
-import { ref, type Ref } from "vue";
+import RouteName from "./RouteName.vue";
+import type { FullyDescribedRoute } from "@/store/TBM";
+import { ref } from "vue";
 
 export interface RouteHeader {
-  route: OperatingRoute;
-  destSelect?: boolean;
+  route: FullyDescribedRoute;
 }
-const props = withDefaults(defineProps<RouteHeader>(), {
-  destSelect: false,
-});
+const props = defineProps<RouteHeader>();
 
 export type Checked = Record<
-  OperatingRoute["stopPointDetails"]["schedules"]["destinations"][number],
+  FullyDescribedRoute["stopPointDetails"]["schedules"]["destinations"][number],
   boolean
 >;
 
-const checked: Ref<Checked> = ref(
+const checked = ref<Checked>(
   props.route.stopPointDetails.schedules.destinations.reduce((acc, v) => ({ ...acc, [v]: true }), {}),
 );
 
@@ -27,31 +25,8 @@ emit("update:checked", checked.value);
 </script>
 
 <template>
-  <div>
-    <img
-      v-if="'id' in route.lineDetails"
-      width="25"
-      class="inline align-middle"
-      :src="route.lineDetails.picto"
-    />
-    <p class="mx-1 inline align-middle">
-      {{
-        route.stopPointDetails.route.line.type === "Bus" ||
-        route.stopPointDetails.route.line.type === "Autocar" ||
-        route.stopPointDetails.route.line.type === "Bus Scolaire"
-          ? "🚌"
-          : route.stopPointDetails.route.line.type === "Tramway"
-            ? "🚋"
-            : route.stopPointDetails.route.line.type === "Train régional / TER"
-              ? "🚆"
-              : ""
-      }}
-    </p>
-    <h4 class="font-bold text-base py-1 inline align-middle">
-      {{ route.line.name }}
-    </h4>
-  </div>
-  <div v-if="destSelect" class="mt-1">
+  <RouteName :route="route" />
+  <div class="mt-1">
     <div
       v-for="destination in route.stopPointDetails.schedules.destinations"
       :key="destination"

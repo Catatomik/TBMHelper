@@ -106,7 +106,7 @@ fetchMinimized();
         />
       </span>
       <CustomButton
-        v-if="paused.includes(stopArea.id) && !minimized.includes(stopArea.id)"
+        v-if="paused.includes(stopArea.id) || minimized.includes(stopArea.id)"
         :button="Button.Play"
         :border-color="'border-blue-500'"
         :fill-color="'fill-green-500'"

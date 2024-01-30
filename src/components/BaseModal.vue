@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { onMounted, onUpdated, ref } from "vue";
 import { getNewTopZIndex } from "@/store";
-import CloseButton from "./CloseButton.vue";
+import CustomButton from "./CustomButton.vue";
+import { Button } from "@/store/Buttons";
 
 export interface Modal {
   bgColor?: string;
@@ -60,7 +61,13 @@ onUpdated(async () => {
       <div class="shadow-lg flex flex-col w-full rounded-md" :class="[bgColor]">
         <div class="flex flex-shrink-0 items-center justify-between py-4 px-2 mx-2 border-b">
           <slot name="title"></slot>
-          <CloseButton class="ml-2 hover:scale-[110%] duration-300 justify-self-end" @click="show(false)" />
+          <CustomButton
+            :button="Button.Close"
+            :border-color="'border-red-500'"
+            :fill-color="'fill-red-500'"
+            class="ml-2 hover:scale-[110%] duration-300 justify-self-end"
+            @click="show(false)"
+          />
         </div>
         <div class="relative p-4">
           <slot name="content"></slot>

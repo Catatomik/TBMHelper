@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { dateCompact, duration, type Settings, FetchStatus, now } from "@/store";
 import { ref } from "vue";
-import CloseButton from "@/components/CloseButton.vue";
+import CustomButton from "@/components/CustomButton.vue";
 import RouteHeader, { type Checked } from "./RouteHeader.vue";
 import RealtimeJourneyModal, { type Modal as RealtimeJourneyModalProps } from "./JourneyModal.vue";
+import { dateCompact, duration, FetchStatus, now } from "@/store";
 import {
   type StopPoint,
   type Route,
@@ -17,48 +17,63 @@ import {
   type Schedules,
   fetchVehicleJourney,
   extractLineCode,
+  type StopArea,
+  type TBMLineType,
   type lineType,
 } from "@/store/TBM";
+import { Button } from "@/store/Buttons";
+import { minimized, paused, settings } from "@/store/Storage";
 
 interface Props {
-  stopPoint: StopPoint;
-  settings: Settings;
+  stopPoint: StopPoint & { stopAreaId: StopArea["id"] };
 }
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: "softDelete"): void;
-  (e: "hardDelete"): void;
+  (e: "delete"): void;
 }>();
 
 const realtimeRoutesSchedules = ref<{
-  [x: Route["id"]]: RouteRealtime & { route: OperatingRoute };
+  [x: Route["id"]]: RouteRealtime & { route: OperatingRoute } & { timeoutID: number | null };
 }>({});
 
 props.stopPoint.routes.forEach(async (route) => {
   const stopPointDetails = await fetchStopPointDetails(route, props.stopPoint);
   if (!stopPointDetails) return;
 
-  const lineDetails = (["Bus", "Bus Scolaire", "Tramway"] as lineType[]).includes(
-    stopPointDetails.route.line.type,
-  )
+  const lineDetails = ((
+    ["Bus", "Bus Scolaire", "Bus de Nuit", "Tramway"] satisfies TBMLineType[] as lineType[]
+  ).includes(stopPointDetails.route.line.type)
     ? await fetchLineDetails(route.line)
-    : null;
+    : null) ?? {
+    externalCode: extractLineCode(route.line) ?? "Will be errored if reached",
+  };
 
   refreshRouteRealtime({
     ...route,
     stopPointDetails,
-    lineDetails:
-      lineDetails == null
-        ? {
-            externalCode: extractLineCode(route.line) ?? "Will be errored if reached",
-          }
-        : lineDetails,
+    lineDetails,
     fetch: FetchStatus.Fetching,
   });
 });
 
-function refreshRouteRealtime(route: OperatingRoute) {
+function isPaused() {
+  return paused.value.includes(props.stopPoint.id) || paused.value.includes(props.stopPoint.stopAreaId);
+}
+
+function refreshRouteRealtime(route: OperatingRoute, force = false) {
+  if ((isPaused() && !force) || minimized.value.includes(props.stopPoint.stopAreaId)) {
+    if (!realtimeRoutesSchedules.value[route.id]) {
+      route.fetch = FetchStatus.Errored;
+      realtimeRoutesSchedules.value[route.id] = {
+        destinations: [],
+        route,
+        timeoutID: null,
+      };
+    }
+    return setRefreshRouteRealtime(route);
+  }
+
   route.fetch = FetchStatus.Fetching;
   fetchRouteRealtime(route.stopPointDetails, route.lineDetails, route)
     .then((r) => {
@@ -68,6 +83,7 @@ function refreshRouteRealtime(route: OperatingRoute) {
         realtimeRoutesSchedules.value[route.id] = {
           destinations: r.destinations.sort((a, b) => a.waittime - b.waittime),
           route,
+          timeoutID: null,
         };
         if (
           journeyModalComp.value?.shown &&
@@ -81,17 +97,30 @@ function refreshRouteRealtime(route: OperatingRoute) {
             realtimeSchedulesData.value.trip = RRI;
           }
         }
-      } else realtimeRoutesSchedules.value[route.id] = { destinations: [], route };
+      } else realtimeRoutesSchedules.value[route.id] = { destinations: [], route, timeoutID: null };
     })
     .catch((_) => {
       route.fetch = FetchStatus.Errored;
-      realtimeRoutesSchedules.value[route.id] = { destinations: [], route };
+      realtimeRoutesSchedules.value[route.id] = { destinations: [], route, timeoutID: null };
     })
-    .finally(() => {
-      setTimeout(() => {
-        refreshRouteRealtime(route);
-      }, 10_000);
-    });
+    .finally(() => setRefreshRouteRealtime(route));
+}
+
+function setRefreshRouteRealtime(route: OperatingRoute) {
+  const timeoutID = setTimeout(() => {
+    refreshRouteRealtime(route);
+  }, 10_000);
+  if (realtimeRoutesSchedules.value[route.id]) realtimeRoutesSchedules.value[route.id].timeoutID = timeoutID;
+}
+
+function forceRefreshRouteRealtime(route: OperatingRoute) {
+  const timeoutID = realtimeRoutesSchedules.value[route.id]?.timeoutID;
+  if (timeoutID) clearTimeout(timeoutID);
+  refreshRouteRealtime(route, true);
+}
+
+function forceRefreshStopPointRealtime() {
+  Object.values(realtimeRoutesSchedules.value).forEach(({ route }) => forceRefreshRouteRealtime(route));
 }
 
 const journeyModalComp = ref<InstanceType<typeof RealtimeJourneyModal> | null>(null);
@@ -132,18 +161,28 @@ async function displayRealtimeSchedules(
 }
 
 const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
+
+defineExpose({
+  forceRefreshStopPointRealtime,
+});
 </script>
 
 <template>
-  <div class="rounded-lg bg-slate-100 p-3 shadow-xl">
+  <div class="rounded-lg bg-slate-200 p-3 shadow-xl">
     <div class="flex items-center">
-      <h3 class="text-center font-bold text-lg mx-auto">📍 {{ stopPoint.name }}</h3>
-      <CloseButton
+      <CustomButton
+        :button="Button.Refresh"
+        :border-color="'border-violet-500'"
+        :fill-color="'fill-violet-500'"
+        @click="forceRefreshStopPointRealtime()"
+      />
+      <h3 class="text-center font-bold text-lg mx-auto">🚏 {{ stopPoint.name }}</h3>
+      <CustomButton
+        :button="Button.Close"
         :border-color="'border-orange-400'"
         :fill-color="'fill-orange-400'"
-        @click="emit('softDelete')"
+        @click="emit('delete')"
       />
-      <CloseButton class="ml-2" @click="emit('hardDelete')" />
     </div>
     <RealtimeJourneyModal
       v-if="realtimeSchedulesData"
@@ -151,9 +190,8 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
       :route="realtimeSchedulesData.route"
       :trip="realtimeSchedulesData.trip"
       :journey="realtimeSchedulesData.journey"
-      :settings="settings"
     ></RealtimeJourneyModal>
-    <hr class="my-2" />
+    <hr class="my-2 border-slate-300" />
     <p
       v-if="
         Object.values(realtimeRoutesSchedules).every(
@@ -162,7 +200,7 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
       "
       class="text-red-700"
     >
-      Impossible de récupérer les horaires de cet arrêt
+      {{ isPaused() ? "Rafraîchissement en pause" : "Impossible de récupérer les horaires de cet arrêt" }}
     </p>
     <div
       v-for="routeId of (
@@ -187,7 +225,6 @@ const destShown = ref<Record<StopPoint["routes"][number]["id"], Checked>>({});
     >
       <RouteHeader
         :route="realtimeRoutesSchedules[routeId].route"
-        :dest-select="true"
         @update:checked="(checked) => (destShown[routeId] = checked)"
       ></RouteHeader>
       <p v-if="realtimeRoutesSchedules[routeId].route.fetch === FetchStatus.Errored" class="text-red-700">

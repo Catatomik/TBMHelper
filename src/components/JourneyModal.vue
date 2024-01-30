@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { onMounted, onUpdated, ref } from "vue";
-import { dateCompact, duration, getNewTopZIndex, now, type Settings } from "@/store";
-import CloseButton from "./CloseButton.vue";
-import RouteHeader from "./RouteHeader.vue";
+import { dateCompact, duration, getNewTopZIndex, now } from "@/store";
+import CustomButton from "./CustomButton.vue";
+import RouteName from "./RouteName.vue";
 import type { OperatingRoute, RouteRealtimeInfos, VehicleJourneySchedule } from "@/store/TBM";
+import { settings } from "@/store/Storage";
+import { Button } from "@/store/Buttons";
 
 export interface Modal {
   route: OperatingRoute;
   trip?: RouteRealtimeInfos<"TREATED">;
   journey: VehicleJourneySchedule<"TREATED">[];
-  settings: Settings;
 }
 defineProps<Modal>();
 
@@ -63,8 +64,14 @@ onUpdated(async () => {
     <div class="mx-auto my-5 w-fit h-auto duration-300" @click="(e) => e.stopPropagation()">
       <div class="shadow-lg flex flex-col w-full h-full rounded-md bg-slate-100">
         <div class="flex flex-shrink-0 items-center justify-between pt-4 p-2 mx-2 border-b">
-          <RouteHeader :route="route"></RouteHeader>
-          <CloseButton class="ml-2 hover:scale-[110%] duration-300 justify-self-end" @click="show(false)" />
+          <RouteName :route="route"></RouteName>
+          <CustomButton
+            :button="Button.Close"
+            :border-color="'border-red-500'"
+            :fill-color="'fill-red-500'"
+            class="ml-2 hover:scale-[110%] duration-300 justify-self-end"
+            @click="show(false)"
+          />
         </div>
         <div class="relative py-2 px-4 overflow-auto">
           <div

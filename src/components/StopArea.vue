@@ -128,8 +128,11 @@ fetchMinimized();
       <h2
         class="grow text-center font-bold text-lg mx-auto"
         @click="
-          if (minimized.includes(stopArea.id)) setUnminimized(stopArea.id);
-          else setMinimized(stopArea.id);
+          if (minimized.includes(stopArea.id)) {
+            setUnminimized(stopArea.id);
+            setUnpaused(stopArea.id);
+            forceRefreshStopAreaRealtime();
+          } else setMinimized(stopArea.id);
         "
       >
         📍

@@ -65,7 +65,7 @@ async function fetchPaused() {
 }
 
 function setPaused(s: StopPoint["id"] | StopArea["id"]) {
-  if (paused.value.length === paused.value.push(s)) return updateStoredPaused();
+  if (paused.value.length !== paused.value.push(s)) return updateStoredPaused();
 }
 
 function setUnpaused(s: StopPoint["id"] | StopArea["id"]) {
@@ -99,7 +99,7 @@ async function fetchMinimized() {
 }
 
 function setMinimized(sa: StopArea["id"]) {
-  if (minimized.value.length === minimized.value.push(sa)) return updateStoredMinimized();
+  if (minimized.value.length !== minimized.value.push(sa)) return updateStoredMinimized();
 }
 
 function setUnminimized(sa: StopArea["id"]) {

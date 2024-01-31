@@ -128,8 +128,11 @@ fetchMinimized();
       <h2
         class="grow text-center font-bold text-lg mx-auto"
         @click="
-          if (minimized.includes(stopArea.id)) setUnminimized(stopArea.id);
-          else setMinimized(stopArea.id);
+          if (minimized.includes(stopArea.id)) {
+            setUnminimized(stopArea.id);
+            setUnpaused(stopArea.id);
+            forceRefreshStopAreaRealtime();
+          } else setMinimized(stopArea.id);
         "
       >
         📍
@@ -150,26 +153,24 @@ fetchMinimized();
         @click="removeStopArea(stopArea)"
       />
     </div>
-    <div
-      class="grid transition-[grid-template-rows] duration-700"
-      :class="minimized.includes(stopArea.id) ? ['grid-rows-[0fr]'] : ['grid-rows-[1fr]']"
-    >
-      <div
-        class="mx-2 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-hidden transition-[margin] duration-1000"
-        :class="minimized.includes(stopArea.id) ? ['my-0'] : ['my-3']"
-      >
-        <StopPointComp
-          v-for="stopPoint of getWantedStops(selectedStops).filter(
-            (stopPoint) => stopPoint.stopAreaId === stopArea.id,
-          )"
-          :key="stopPoint.id"
-          ref="stopPointComps"
-          :stop-point="stopPoint"
-          :settings="settings"
-          @delete="removeStopPoint(stopArea, stopPoint)"
-        />
+    <Transition name="collapse">
+      <div v-show="!minimized.includes(stopArea.id)" class="grid grid-rows-[1fr]">
+        <div
+          class="mx-2 my-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-hidden transition-margin"
+        >
+          <StopPointComp
+            v-for="stopPoint of getWantedStops(selectedStops).filter(
+              (stopPoint) => stopPoint.stopAreaId === stopArea.id,
+            )"
+            :key="stopPoint.id"
+            ref="stopPointComps"
+            :stop-point="stopPoint"
+            :settings="settings"
+            @delete="removeStopPoint(stopArea, stopPoint)"
+          />
+        </div>
       </div>
-    </div>
+    </Transition>
 
     <BaseModal
       ref="restoreStopComp"
@@ -228,5 +229,27 @@ fetchMinimized();
 
 [disabled-load="true"] * {
   @apply disabled-load;
+}
+
+.collapse-enter-active,
+.collapse-leave-active {
+  @apply transition-[grid-template-rows];
+  @apply duration-700;
+}
+
+.collapse-enter-active .transition-margin,
+.collapse-leave-active .transition-margin {
+  @apply transition-[margin];
+  @apply duration-1000;
+}
+
+.collapse-enter-from,
+.collapse-leave-to {
+  @apply grid-rows-[0fr] !important;
+}
+
+.collapse-enter-from .transition-margin,
+.collapse-leave-to .transition-margin {
+  @apply my-0 !important;
 }
 </style>

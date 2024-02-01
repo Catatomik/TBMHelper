@@ -26,7 +26,7 @@ import {
   fetchLineDetails,
   fetchStopPointDetails,
   type FullyDescribedRoute,
-  type FullyDescribedStopArea,
+  type StopAreaDetails,
   type lineType,
   type StopPoint,
   type TBMLineType,
@@ -36,7 +36,7 @@ import { mapAsync } from "@/store";
 import RouteName from "./RouteName.vue";
 
 interface Props {
-  stopArea: FullyDescribedStopArea;
+  stopArea: StopAreaDetails;
 }
 
 const props = defineProps<Props>();
@@ -55,8 +55,8 @@ async function getExcludedStopPoints() {
     excludedStopPoints.value
       .filter(([stopAreaId]) => stopAreaId === props.stopArea.id)
       .map<StopPoint | undefined>(([_, stopPointId]) =>
-        selectedStops.value
-          .flatMap((stopArea) => stopArea.details.stopPoints)
+        selectedStopAreas.value
+          .flatMap((stopArea) => stopArea.stopPoints)
           .find((stopPoint) => stopPoint.id === stopPointId),
       )
       .filter((sp): sp is StopPoint => sp !== undefined),

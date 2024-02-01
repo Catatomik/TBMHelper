@@ -3,16 +3,17 @@ import { onMounted, ref } from "vue";
 import { onBeforeRouteUpdate, useRoute } from "vue-router";
 import SettingsComp from "@/components/BaseSettings.vue";
 import StopAreaComp from "@/components/StopArea.vue";
-import { fetchStops } from "@/store/TBM";
+import { fetchStopAreas } from "@/store/TBM";
 // May wait for settings & use loader instead
 import { fetchPaused, settings, updateStoredSettings } from "@/store/Storage";
 import {
   addStopArea,
   provideQuery,
   queryUpdated,
-  selectedStops,
-  stops,
+  selectedStopAreas,
+  stopAreas,
   getWantedStops,
+  excludedStopPoints,
 } from "@/store/StopsManager";
 
 const showSettingsButton = ref<HTMLButtonElement | null>(null);
@@ -28,17 +29,22 @@ onBeforeRouteUpdate((to) => queryUpdated(to));
 
 const stopInput = ref<string>("");
 
-async function refreshStops() {
-  if (await addCurrentStop()) return;
-  if (stopInput.value.length < 3) return (stops.value = []);
-  stops.value = await fetchStops(stopInput.value);
+async function refreshStopAreas() {
+  if (await addCurrentStopArea()) return;
+  if (stopInput.value.length < 3) return (stopAreas.value = []);
+  stopAreas.value = await fetchStopAreas(stopInput.value);
 }
 
-async function addCurrentStop() {
-  const r = await addStopArea(stopInput.value);
-  if (r >= 0) {
-    stopInput.value = "";
-    if (r > 1) stops.value = [];
+async function addCurrentStopArea() {
+  const matches = stopAreas.value.filter((sa) => sa.name === stopInput.value);
+  let r: Awaited<ReturnType<typeof addStopArea>> = -2;
+  for (const match of matches) {
+    const newR = await addStopArea(match);
+    if (r < 0 && newR >= 0) {
+      stopInput.value = "";
+      stopAreas.value = [];
+    }
+    if (newR > r) r = newR;
   }
 
   return r >= 0;
@@ -54,14 +60,26 @@ async function addCurrentStop() {
             class="p-1 w-2/3 border-[3px] border-slate-400 rounded-md shadow-md outline-none focus-visible:border-slate-600"
             type="text"
             placeholder="Chercher un arrêt..."
-            list="selectedStops"
+            list="selectedStopAreas"
             :value="stopInput"
-            @input="(stopInput = ($event.target as HTMLInputElement).value), refreshStops()"
-            @keyup.enter="addCurrentStop()"
+            @input="
+              stopInput = ($event.target as HTMLInputElement).value;
+              refreshStopAreas();
+            "
+            @keyup.enter="addCurrentStopArea()"
           />
 
-          <datalist id="selectedStops">
-            <option v-for="stop of stops" :key="stop.id" :value="stop.name" />
+          <datalist id="selectedStopAreas">
+            <option
+              v-for="stopArea of stopAreas"
+              :key="stopArea.id"
+              :disabled="
+                selectedStopAreas.find(({ id: saId }) => saId === stopArea.id) &&
+                excludedStopPoints.every(([sa]) => sa !== stopArea.id)
+              "
+              :label="`${stopArea.name} (${stopArea.city})`"
+              :value="stopArea.name"
+            />
           </datalist>
         </div>
         <div class="w-1/3 my-auto flex ml-1">
@@ -86,13 +104,13 @@ async function addCurrentStop() {
           />
         </div>
       </div>
-      <h3 v-if="!getWantedStops(selectedStops).length" class="mt-5 text-center font-bold text-lg">
+      <h3 v-if="!getWantedStops(selectedStopAreas).length" class="mt-5 text-center font-bold text-lg">
         Aucun arrêt sélectionné
       </h3>
       <div v-else>
         <StopAreaComp
-          v-for="stopArea of selectedStops.filter((stopArea) =>
-            getWantedStops(selectedStops).find(({ stopAreaId }) => stopAreaId === stopArea.id),
+          v-for="stopArea of selectedStopAreas.filter((stopArea) =>
+            getWantedStops(selectedStopAreas).find(({ stopAreaId }) => stopAreaId === stopArea.id),
           )"
           :key="stopArea.id"
           :stop-area="stopArea"

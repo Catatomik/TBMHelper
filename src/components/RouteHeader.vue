@@ -18,7 +18,7 @@ const checked = ref<Checked>(
 );
 
 const emit = defineEmits<{
-  (e: "update:checked", checked: Checked): void;
+  "update:checked": [checked: Checked];
 }>();
 
 emit("update:checked", checked.value);

@@ -12,12 +12,12 @@ type stopAreaId = `stop_area:${string}`;
 interface StopArea {
   id: stopAreaId;
   name: string; // stop area name
+  city: string;
   type: "line" | "stop_area";
   mode: string;
-  url: string;
 }
 
-async function fetchStops(stop: string): Promise<StopArea[]> {
+async function fetchStopAreas(stop: string): Promise<StopArea[]> {
   try {
     const results: StopArea[] = (await instance.get(`get-schedule/${encodeURI(stop)}`)).data;
 
@@ -60,9 +60,7 @@ interface StopAreaDetails {
   stopPoints: StopPoint[];
 }
 
-type FullyDescribedStopArea = StopArea & { details: StopAreaDetails };
-
-async function fetchStopAreaDetails(stopArea: StopArea): Promise<FullyDescribedStopArea | null> {
+async function fetchStopAreaDetails(stopArea: Pick<StopArea, "id">): Promise<StopAreaDetails | null> {
   if (TBMCache.value[`${stopArea.id}-full`]) return TBMCache.value[`${stopArea.id}-full`];
 
   try {
@@ -94,10 +92,7 @@ async function fetchStopAreaDetails(stopArea: StopArea): Promise<FullyDescribedS
         )),
     );
 
-    return (TBMCache.value[`${stopArea.id}-full`] = {
-      ...stopArea,
-      details,
-    });
+    return (TBMCache.value[`${stopArea.id}-full`] = details);
   } catch (_) {
     return null;
   }
@@ -355,14 +350,14 @@ type OperatingRoute = FullyDescribedRoute & { fetch: FetchStatus };
 
 const TBMCache = ref<
   { [x: `${StopAreaDetails["id"]}-details`]: StopAreaDetails } & {
-    [x: `${StopArea["id"]}-full`]: FullyDescribedStopArea;
+    [x: `${StopArea["id"]}-full`]: StopAreaDetails;
   } & { [x: `${StopPoint["id"]}-details`]: StopPointDetails } & {
     [x: `${Line["id"]}-details`]: LineDetails;
   }
 >({});
 
 export {
-  fetchStops,
+  fetchStopAreas,
   fetchStopAreaDetails,
   fetchStopPointDetails,
   extractLineCode,
@@ -380,7 +375,7 @@ export type {
   TBMLineType,
   LineDetails,
   Route,
-  FullyDescribedStopArea,
+  StopAreaDetails,
   RouteRealtime,
   RouteRealtimeInfos,
   Schedules,

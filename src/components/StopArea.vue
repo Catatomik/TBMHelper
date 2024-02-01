@@ -18,7 +18,7 @@ import {
   removeStopPoint,
   removeStopArea,
   getWantedStops,
-  selectedStops,
+  selectedStopAreas,
   excludedStopPoints,
 } from "@/store/StopsManager";
 import {
@@ -26,7 +26,7 @@ import {
   fetchLineDetails,
   fetchStopPointDetails,
   type FullyDescribedRoute,
-  type FullyDescribedStopArea,
+  type StopAreaDetails,
   type lineType,
   type StopPoint,
   type TBMLineType,
@@ -36,7 +36,7 @@ import { mapAsync } from "@/store";
 import RouteName from "./RouteName.vue";
 
 interface Props {
-  stopArea: FullyDescribedStopArea;
+  stopArea: StopAreaDetails;
 }
 
 const props = defineProps<Props>();
@@ -50,13 +50,13 @@ const restoreStopComp = ref<InstanceType<typeof BaseModal> | null>(null);
 
 const excludedStopPointsToRestore = ref<(StopPoint & { routes: FullyDescribedRoute[] })[]>([]);
 
-async function getExcludedStopPoints() {
+async function getExcludedStopPointsToRestore() {
   excludedStopPointsToRestore.value = await mapAsync(
     excludedStopPoints.value
       .filter(([stopAreaId]) => stopAreaId === props.stopArea.id)
       .map<StopPoint | undefined>(([_, stopPointId]) =>
-        selectedStops.value
-          .flatMap((stopArea) => stopArea.details.stopPoints)
+        selectedStopAreas.value
+          .flatMap((stopArea) => stopArea.stopPoints)
           .find((stopPoint) => stopPoint.id === stopPointId),
       )
       .filter((sp): sp is StopPoint => sp !== undefined),
@@ -89,7 +89,7 @@ async function getExcludedStopPoints() {
     restoreStopComp.value.show(false);
 }
 
-watch(excludedStopPoints, getExcludedStopPoints);
+watch(excludedStopPoints, getExcludedStopPointsToRestore);
 
 fetchMinimized();
 </script>
@@ -159,7 +159,7 @@ fetchMinimized();
           class="mx-2 my-3 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 overflow-hidden transition-margin"
         >
           <StopPointComp
-            v-for="stopPoint of getWantedStops(selectedStops).filter(
+            v-for="stopPoint of getWantedStops(selectedStopAreas).filter(
               (stopPoint) => stopPoint.stopAreaId === stopArea.id,
             )"
             :key="stopPoint.id"
@@ -176,7 +176,7 @@ fetchMinimized();
       ref="restoreStopComp"
       @update:shown="
         (s) => {
-          if (s) getExcludedStopPoints();
+          if (s) getExcludedStopPointsToRestore();
         }
       "
     >

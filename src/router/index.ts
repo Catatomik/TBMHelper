@@ -24,13 +24,13 @@ router.beforeResolve(async (to, from) => {
     try {
       const { value } = await Preferences.get({ key: preferencesKeys.location });
       return value && value !== "/" ? value : true;
-    } catch (_) {
+    } catch {
       return true;
     }
 
   try {
     await Preferences.set({ key: preferencesKeys.location, value: to.fullPath });
-  } catch (_) {}
+  } catch {}
 });
 
 App.addListener("appUrlOpen", function (event: URLOpenListenerEvent) {

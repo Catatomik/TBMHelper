@@ -30,7 +30,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-  (e: "delete"): void;
+  delete: [];
 }>();
 
 const realtimeRoutesSchedules = ref<{

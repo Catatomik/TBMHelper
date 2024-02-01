@@ -12,8 +12,8 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), { initShown: false });
 
 const emit = defineEmits<{
-  (e: "update:shown", shown: boolean): void;
-  (e: "update:modelValue", settings: Settings): void;
+  "update:shown": [shown: boolean];
+  "update:modelValue": [settings: Settings];
 }>();
 
 fetchSettings().then((r) => {

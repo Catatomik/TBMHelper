@@ -1,25 +1,26 @@
 import { ref } from "vue";
-import {
-  fetchStopAreaDetails,
-  fetchStops,
-  type FullyDescribedStopArea,
-  type StopArea,
-  type StopPoint,
-} from "./TBM";
+import { fetchStopAreaDetails, type StopAreaDetails, type StopArea, type StopPoint } from "./TBM";
 import router from "@/router";
 import { type LocationQuery, type RouteLocationNormalized } from "vue-router";
 import { unique } from ".";
 
-const selectedStops = ref<FullyDescribedStopArea[]>([]);
+const selectedStopAreas = ref<StopAreaDetails[]>([]);
 const excludedStopPoints = ref<[StopArea["id"], StopPoint["id"]][]>([]);
 
-const stops = ref<StopArea[]>([]);
+const stopAreas = ref<StopArea[]>([]);
 
 let query: LocationQuery = {};
 let queryInternallyUpdated = false;
 
 function provideQuery(q: LocationQuery) {
   query = { ...q };
+}
+
+// In ascending order
+function getStopAreaKeysFromQuery(q: LocationQuery) {
+  return Object.keys(q)
+    .filter((k) => !isNaN(parseInt(k)))
+    .sort((a, b) => parseInt(a) - parseInt(b));
 }
 
 async function queryUpdated(to: RouteLocationNormalized) {
@@ -29,31 +30,27 @@ async function queryUpdated(to: RouteLocationNormalized) {
   }
   query = { ...to.query };
 
-  for (const k of Object.keys(to.query)
-    .filter((k) => !isNaN(parseInt(k)))
-    .sort((a, b) => parseInt(a) - parseInt(b))) {
-    const providenStop = to.query[k] as string;
+  const stopAreaKeys = getStopAreaKeysFromQuery(to.query);
+  for (const k of stopAreaKeys) {
+    const providedStopAreaId = to.query[k] as string;
 
-    if (selectedStops.value.find((s) => s.name === providenStop)) continue;
-    const found = (await fetchStops(providenStop)).find((s) => s.name === providenStop);
-    if (!found) {
+    const deserializedStopAreaId = deserializeStopAreaId(providedStopAreaId);
+    if (selectedStopAreas.value.find((sa) => sa.id === deserializedStopAreaId)) continue;
+
+    const StopAreaDetails = await fetchStopAreaDetails({ id: deserializedStopAreaId });
+    if (!StopAreaDetails) {
       delete query[k];
       queryInternallyUpdated = true;
       router.push({ query });
       continue;
     }
-    const fullyDescribedStopArea = await fetchStopAreaDetails(found);
-    if (!fullyDescribedStopArea) {
-      delete query[k];
-      queryInternallyUpdated = true;
-      router.push({ query });
-      continue;
-    }
-    selectedStops.value = [...selectedStops.value, fullyDescribedStopArea];
+    selectedStopAreas.value.splice(parseInt(k) - 1, 0, StopAreaDetails);
   }
 
-  const providenStops = Object.keys(query).map((k) => query[k]);
-  selectedStops.value = selectedStops.value.filter((s) => providenStops.includes(s.name));
+  selectedStopAreas.value = selectedStopAreas.value.filter((sa) => {
+    const serializedStopAreaId = serializeStopAreaId(sa.id);
+    return stopAreaKeys.find((k) => query[k] === serializedStopAreaId);
+  });
 
   excludedStopPoints.value = deserializeExcludedStopPoints(
     typeof query["eSP"] === "string" ? query["eSP"] : "",
@@ -73,16 +70,16 @@ function deserializeExcludedStopPoints(serializedExcludedStopPoints: string) {
     const stopAreaName = query[stopAreaNumber];
     if (!stopAreaName) continue;
 
-    const stopArea = selectedStops.value.find((s) => s.name === stopAreaName);
-    if (!stopArea) continue;
+    const StopAreaDetails = selectedStopAreas.value.find((s) => s.name === stopAreaName);
+    if (!StopAreaDetails) continue;
 
     const stopPoints = stopAreaString.split("-");
 
     for (let i = 1; i < stopPoints.length; i++) {
-      const stopPoint = stopArea.details.stopPoints.find((s) => s.id.endsWith(stopPoints[i]));
+      const stopPoint = StopAreaDetails.stopPoints.find((s) => s.id.endsWith(stopPoints[i]));
       if (!stopPoint) continue;
 
-      excludedStopPoints.push([stopArea.id, stopPoint.id]);
+      excludedStopPoints.push([StopAreaDetails.id, stopPoint.id]);
     }
   }
 
@@ -93,7 +90,7 @@ function serializeExcludedStopPoints(excludedStopPoints: [StopArea["id"], StopPo
   const partialExcludedStopPoints = [] as string[];
 
   for (const stopAreaId of excludedStopPoints.map(([stopArea]) => stopArea).filter(unique)) {
-    const stopArea = selectedStops.value.find((s) => s.id === stopAreaId);
+    const stopArea = selectedStopAreas.value.find((s) => s.id === stopAreaId);
     if (!stopArea) continue;
 
     const stopAreaNumber = Object.keys(query).find((k) => query[k] === stopArea.name);
@@ -110,11 +107,19 @@ function serializeExcludedStopPoints(excludedStopPoints: [StopArea["id"], StopPo
   return partialExcludedStopPoints.join(",");
 }
 
-async function addStopArea(stop: string) {
-  const alreadySelected = selectedStops.value.find((s) => s.name === stop);
+function serializeStopAreaId(stopAreaId: StopArea["id"]) {
+  return stopAreaId.substring("stop_area:".length);
+}
+
+function deserializeStopAreaId(stopAreaId: string): StopArea["id"] {
+  return `stop_area:${stopAreaId}`;
+}
+
+async function addStopArea(stopArea: StopArea) {
+  const alreadySelected = selectedStopAreas.value.find((s) => s.id === stopArea.id);
   if (alreadySelected) {
     if (excludedStopPoints.value.find(([sa]) => sa === alreadySelected.id)) {
-      excludedStopPoints.value = excludedStopPoints.value.filter(([sp]) => sp != alreadySelected.id);
+      excludedStopPoints.value = excludedStopPoints.value.filter(([sa]) => sa != alreadySelected.id);
       query["eSP"] = serializeExcludedStopPoints(excludedStopPoints.value);
       if (!query["eSP"].length) delete query["eSP"];
       queryInternallyUpdated = true;
@@ -123,22 +128,69 @@ async function addStopArea(stop: string) {
     } else return -1; //display error
   }
 
-  const found = stops.value.find((s) => s.name === stop);
-  if (!found) return -2; // display error
+  const StopAreaDetails = await fetchStopAreaDetails(stopArea);
+  if (!StopAreaDetails) return -2; // display error
 
-  const fullyDescribedStopArea = await fetchStopAreaDetails(found);
-  if (!fullyDescribedStopArea) return -3; // display error
-
-  query[Object.keys(query).length + 1] = fullyDescribedStopArea.name;
+  query[getStopAreaKeysFromQuery(query).length + 1] = serializeStopAreaId(StopAreaDetails.id);
   queryInternallyUpdated = true;
   router.push({ query });
 
-  selectedStops.value.push(fullyDescribedStopArea);
+  selectedStopAreas.value.push(StopAreaDetails);
 
   return 0;
 }
 
-async function addStopPoint(stopArea: StopArea, stopPointId: StopPoint["id"]) {
+function removeStopArea(stopArea: StopAreaDetails) {
+  selectedStopAreas.value = selectedStopAreas.value.filter((s) => s.id != stopArea.id);
+
+  let queryNeedUpdate = false;
+
+  if (excludedStopPoints.value.find(([stopAreaId]) => stopAreaId === stopArea.id)) {
+    queryNeedUpdate = true;
+    excludedStopPoints.value = excludedStopPoints.value.filter(([stopAreaId]) => stopAreaId !== stopArea.id);
+    query["eSP"] = serializeExcludedStopPoints(excludedStopPoints.value);
+    if (!query["eSP"].length) delete query["eSP"];
+  }
+
+  const serializedStopAreaId = serializeStopAreaId(stopArea.id);
+  Object.keys(query).forEach((k) => {
+    if (query[k] === serializedStopAreaId) {
+      queryNeedUpdate = true;
+      delete query[k];
+    }
+  });
+
+  let gap = 0;
+  getStopAreaKeysFromQuery(query).forEach((k, i, arr) => {
+    const intK = parseInt(k);
+
+    // Init, full rename case
+    if (i === 0) gap = intK - 1;
+
+    if (gap) {
+      query[(intK - gap).toString()] = query[k];
+      delete query[k];
+    }
+
+    // End of array, do not compute next gap
+    if (i === arr.length - 1) return;
+    const intK2 = parseInt(arr[i + 1]);
+
+    // Next gap
+    gap += intK2 - intK - 1;
+  });
+  if (gap) queryNeedUpdate = true;
+
+  if (queryNeedUpdate) {
+    queryInternallyUpdated = true;
+    router.push({ query });
+  }
+}
+
+async function addStopPoint(
+  stopArea: Parameters<typeof fetchStopAreaDetails>[0],
+  stopPointId: StopPoint["id"],
+) {
   if (excludedStopPoints.value.find(([_, sp]) => sp === stopPointId)) {
     excludedStopPoints.value = excludedStopPoints.value.filter(([_, sp]) => sp != stopPointId);
     query["eSP"] = serializeExcludedStopPoints(excludedStopPoints.value);
@@ -148,18 +200,19 @@ async function addStopPoint(stopArea: StopArea, stopPointId: StopPoint["id"]) {
     return 1;
   }
 
-  const fullyDescribedStopArea = await fetchStopAreaDetails(stopArea);
-  if (!fullyDescribedStopArea) return -3; // display error
+  // Add stop area, exclude all stop points except stopPointId
+  const StopAreaDetails = await fetchStopAreaDetails(stopArea);
+  if (!StopAreaDetails) return -3; // display error
 
-  for (const stopPoint of fullyDescribedStopArea.details.stopPoints)
+  for (const stopPoint of StopAreaDetails.stopPoints)
     excludedStopPoints.value.push([stopArea.id, stopPoint.id]);
 
-  selectedStops.value.push(fullyDescribedStopArea);
+  selectedStopAreas.value.push(StopAreaDetails);
 
   return 0;
 }
 
-function removeStopPoint(stopArea: FullyDescribedStopArea, stopPoint: StopPoint) {
+function removeStopPoint(stopArea: StopAreaDetails, stopPoint: StopPoint) {
   if (
     excludedStopPoints.value.find(
       ([stopAreaId, stopPointId]) => stopArea.id === stopAreaId && stopPoint.id === stopPointId,
@@ -174,40 +227,15 @@ function removeStopPoint(stopArea: FullyDescribedStopArea, stopPoint: StopPoint)
   queryInternallyUpdated = true;
   router.push({ query });
 
-  if (stopArea.details.stopPoints.every((s) => excludedStopPoints.value.find((esp) => s.id === esp[1])))
+  if (stopArea.stopPoints.every((s) => excludedStopPoints.value.find((esp) => s.id === esp[1])))
     removeStopArea(stopArea);
 }
 
-function removeStopArea(stopArea: FullyDescribedStopArea) {
-  selectedStops.value = selectedStops.value.filter((s) => s.id != stopArea.id);
-
-  let queryNeedUpdate = false;
-
-  if (excludedStopPoints.value.find(([stopAreaId]) => stopAreaId === stopArea.id)) {
-    queryNeedUpdate = true;
-    excludedStopPoints.value = excludedStopPoints.value.filter(([stopAreaId]) => stopAreaId !== stopArea.id);
-    query["eSP"] = serializeExcludedStopPoints(excludedStopPoints.value);
-    if (!query["eSP"].length) delete query["eSP"];
-  }
-
-  Object.keys(query).forEach((k) => {
-    if (query[k] === stopArea.name) {
-      queryNeedUpdate = true;
-      delete query[k];
-    }
-  });
-
-  if (queryNeedUpdate) {
-    queryInternallyUpdated = true;
-    router.push({ query });
-  }
-}
-
-function getWantedStops(stops: typeof selectedStops.value) {
-  return stops.reduce(
-    (acc, stopArea: FullyDescribedStopArea) => [
+function getWantedStops(stopAreas: typeof selectedStopAreas.value) {
+  return stopAreas.reduce(
+    (acc, stopArea: StopAreaDetails) => [
       ...acc,
-      ...stopArea.details.stopPoints
+      ...stopArea.stopPoints
         .filter(
           (sp) =>
             !excludedStopPoints.value.find(
@@ -223,9 +251,9 @@ function getWantedStops(stops: typeof selectedStops.value) {
 }
 
 export {
-  selectedStops,
+  selectedStopAreas,
   excludedStopPoints,
-  stops,
+  stopAreas,
   addStopArea,
   addStopPoint,
   removeStopPoint,

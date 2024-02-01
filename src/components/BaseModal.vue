@@ -11,7 +11,7 @@ export interface Modal {
 const props = withDefaults(defineProps<Modal>(), { initShown: false, bgColor: "bg-slate-100" });
 
 const emit = defineEmits<{
-  (e: "update:shown", shown: boolean): void;
+  "update:shown": [shown: boolean];
 }>();
 
 const focusDiv = ref<HTMLDivElement | null>(null);

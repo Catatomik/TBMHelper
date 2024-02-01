@@ -44,7 +44,7 @@ async function queryUpdated(to: RouteLocationNormalized) {
       router.push({ query });
       continue;
     }
-    selectedStopAreas.value = [...selectedStopAreas.value, StopAreaDetails];
+    selectedStopAreas.value.splice(parseInt(k) - 1, 0, StopAreaDetails);
   }
 
   selectedStopAreas.value = selectedStopAreas.value.filter((sa) => {

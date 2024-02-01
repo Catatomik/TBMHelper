@@ -52,34 +52,42 @@ async function queryUpdated(to: RouteLocationNormalized) {
     return stopAreaKeys.find((k) => query[k] === serializedStopAreaId);
   });
 
-  excludedStopPoints.value = deserializeExcludedStopPoints(
+  excludedStopPoints.value = await deserializeExcludedStopPoints(
     typeof query["eSP"] === "string" ? query["eSP"] : "",
   );
 }
 
-function deserializeExcludedStopPoints(serializedExcludedStopPoints: string) {
+function serializeStopPointId(stopPointId: StopPoint["id"]) {
+  return stopPointId.substring("stop_point:".length);
+}
+
+function deserializeStopPointId(stopPointId: string): StopPoint["id"] {
+  return `stop_point:${stopPointId}`;
+}
+
+async function deserializeExcludedStopPoints(serializedExcludedStopPoints: string) {
   const stopAreas = serializedExcludedStopPoints.split(",");
   if (!stopAreas.length) return [];
 
   const excludedStopPoints = [] as [StopArea["id"], StopPoint["id"]][];
 
   for (const stopAreaString of stopAreas) {
-    const stopAreaNumber = stopAreaString.match(/^\d+/)?.[0];
-    if (stopAreaNumber === undefined) continue;
+    const stopAreaKey = stopAreaString.match(/^\d+/)?.[0];
+    if (!stopAreaKey || !query[stopAreaKey]) continue;
 
-    const stopAreaName = query[stopAreaNumber];
-    if (!stopAreaName) continue;
+    const stopAreaDetails = await fetchStopAreaDetails({
+      id: deserializeStopAreaId(query[stopAreaKey] as string),
+    });
+    if (!stopAreaDetails) continue;
 
-    const StopAreaDetails = selectedStopAreas.value.find((s) => s.name === stopAreaName);
-    if (!StopAreaDetails) continue;
+    const serializedStopPointIds = stopAreaString.split("-");
 
-    const stopPoints = stopAreaString.split("-");
-
-    for (let i = 1; i < stopPoints.length; i++) {
-      const stopPoint = StopAreaDetails.stopPoints.find((s) => s.id.endsWith(stopPoints[i]));
+    for (const serializedStopPointId of serializedStopPointIds) {
+      const deserializedStopPointId = deserializeStopPointId(serializedStopPointId);
+      const stopPoint = stopAreaDetails.stopPoints.find((s) => s.id === deserializedStopPointId);
       if (!stopPoint) continue;
 
-      excludedStopPoints.push([StopAreaDetails.id, stopPoint.id]);
+      excludedStopPoints.push([stopAreaDetails.id, stopPoint.id]);
     }
   }
 
@@ -93,13 +101,14 @@ function serializeExcludedStopPoints(excludedStopPoints: [StopArea["id"], StopPo
     const stopArea = selectedStopAreas.value.find((s) => s.id === stopAreaId);
     if (!stopArea) continue;
 
-    const stopAreaNumber = Object.keys(query).find((k) => query[k] === stopArea.name);
-    if (stopAreaNumber === undefined) continue;
+    const serializedStopAreaId = serializeStopAreaId(stopArea.id);
+    const stopAreaKey = Object.keys(query).find((k) => query[k] === serializedStopAreaId);
+    if (stopAreaKey === undefined) continue;
 
     partialExcludedStopPoints.push(
-      `${stopAreaNumber}-${excludedStopPoints
+      `${stopAreaKey}-${excludedStopPoints
         .filter(([stopArea]) => stopArea === stopAreaId)
-        .map((esp) => esp[1].substring("stop_point:".length))
+        .map((esp) => serializeStopPointId(esp[1]))
         .join("-")}`,
     );
   }
@@ -160,6 +169,7 @@ function removeStopArea(stopArea: StopAreaDetails) {
     }
   });
 
+  // Re-index stop areas
   let gap = 0;
   getStopAreaKeysFromQuery(query).forEach((k, i, arr) => {
     const intK = parseInt(k);
@@ -170,6 +180,10 @@ function removeStopArea(stopArea: StopAreaDetails) {
     if (gap) {
       query[(intK - gap).toString()] = query[k];
       delete query[k];
+
+      const keyMatcher = new RegExp(`(^|(?<=,))${intK}-`, "g");
+      if (typeof query["eSP"] === "string" && query["eSP"].match(keyMatcher))
+        query["eSP"] = query["eSP"].replace(keyMatcher, `${intK - gap}-`);
     }
 
     // End of array, do not compute next gap

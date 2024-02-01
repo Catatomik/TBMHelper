@@ -15,7 +15,7 @@ export interface Modal {
 defineProps<Modal>();
 
 const emit = defineEmits<{
-  (e: "update:shown", shown: boolean): void;
+  "update:shown": [shown: boolean];
 }>();
 
 const focusDiv = ref<HTMLDivElement | null>(null);

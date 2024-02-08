@@ -16,7 +16,7 @@
     "ionic:serve": "npm run dev"
   },
   "dependencies": {
-    "@capacitor/android": "^5.6.0",
+    "@capacitor/android": "^5.7.0",
     "@capacitor/app": "^5.0.7",
     "@capacitor/core": "^5.6.0",
     "@capacitor/preferences": "^5.0.7",

@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   '@capacitor/android':
-    specifier: ^5.7.0
-    version: 5.7.0(@capacitor/core@5.7.0)
+    specifier: ^5.7.1
+    version: 5.7.1(@capacitor/core@5.7.0)
   '@capacitor/app':
     specifier: ^5.0.7
     version: 5.0.7(@capacitor/core@5.7.0)
@@ -138,8 +138,8 @@ packages:
       '@babel/helper-validator-identifier': 7.22.20
       to-fast-properties: 2.0.0
 
-  /@capacitor/android@5.7.0(@capacitor/core@5.7.0):
-    resolution: {integrity: sha512-0bnG1dqfT/nTjzMeHF/a5kF8mqGjHrPLADNqn41seWDfb2ch6AMiKUHsmHpEOWmGIrWOM25qNTrTOytoCSpuXg==}
+  /@capacitor/android@5.7.1(@capacitor/core@5.7.0):
+    resolution: {integrity: sha512-qDsFw72y5GMHup148jrG/DJacEpjCz+r7lteAnMh8Jo1/TJCBvX53MVRmeHKrAnriE2BvTtHSZn4VPNcZlK7+Q==}
     peerDependencies:
       '@capacitor/core': ^5.7.0
     dependencies:

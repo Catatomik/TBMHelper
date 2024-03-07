@@ -41,8 +41,8 @@ devDependencies:
     specifier: ^3.0.4
     version: 3.0.4(@types/node@20.11.20)(typescript@5.3.3)
   '@capacitor/cli':
-    specifier: ^5.7.0
-    version: 5.7.0
+    specifier: ^5.7.1
+    version: 5.7.1
   '@rushstack/eslint-patch':
     specifier: ^1.7.2
     version: 1.7.2
@@ -159,7 +159,7 @@ packages:
     engines: {node: '>=10.3.0'}
     hasBin: true
     dependencies:
-      '@capacitor/cli': 5.7.0
+      '@capacitor/cli': 5.7.1
       '@ionic/utils-array': 2.1.6
       '@ionic/utils-fs': 3.1.7
       '@trapezedev/project': 7.0.10(@types/node@20.11.20)(typescript@5.3.3)
@@ -180,8 +180,8 @@ packages:
       - typescript
     dev: true
 
-  /@capacitor/cli@5.7.0:
-    resolution: {integrity: sha512-md6217RXFQwSNo9vr1gDgBqR88MJaQVwu3C5W3bpWlmajhec6NUR7yT7QNcBWErhCIJfqOOqXu4ZSSShndF0ug==}
+  /@capacitor/cli@5.7.1:
+    resolution: {integrity: sha512-iU+DufCBY2qmtD4ETss15eesMjpPclg7e3DyUDCQuruL1UKYAE5AeB8CctvNrafrC7EPRkuvLhC4dqGV1Vdy3w==}
     engines: {node: '>=16.0.0'}
     hasBin: true
     dependencies:

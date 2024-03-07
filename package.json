@@ -29,7 +29,7 @@
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.4",
-    "@capacitor/cli": "^5.7.0",
+    "@capacitor/cli": "^5.7.1",
     "@rushstack/eslint-patch": "^1.7.2",
     "@tsconfig/node20": "^20.1.2",
     "@types/node": "^20.11.20",

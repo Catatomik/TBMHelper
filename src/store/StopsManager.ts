@@ -58,11 +58,11 @@ async function queryUpdated(to: RouteLocationNormalized) {
 }
 
 function serializeStopPointId(stopPointId: StopPoint["id"]) {
-  return stopPointId.substring("stop_point:".length);
+  return stopPointId.substring("stop_point:".length).replace(/-/g, "+");
 }
 
 function deserializeStopPointId(stopPointId: string): StopPoint["id"] {
-  return `stop_point:${stopPointId}`;
+  return `stop_point:${stopPointId}`.replace(/\+/g, "-") as StopPoint["id"];
 }
 
 async function deserializeExcludedStopPoints(serializedExcludedStopPoints: string) {
@@ -117,11 +117,11 @@ function serializeExcludedStopPoints(excludedStopPoints: [StopArea["id"], StopPo
 }
 
 function serializeStopAreaId(stopAreaId: StopArea["id"]) {
-  return stopAreaId.substring("stop_area:".length);
+  return stopAreaId.substring("stop_area:".length).replace(/-/g, "+");
 }
 
 function deserializeStopAreaId(stopAreaId: string): StopArea["id"] {
-  return `stop_area:${stopAreaId}`;
+  return `stop_area:${stopAreaId}`.replace(/\+/g, "-") as StopArea["id"];
 }
 
 async function addStopArea(stopArea: StopArea) {

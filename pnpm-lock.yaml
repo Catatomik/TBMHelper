@@ -7,16 +7,16 @@ settings:
 dependencies:
   '@capacitor/android':
     specifier: ^5.7.3
-    version: 5.7.3(@capacitor/core@5.7.3)
+    version: 5.7.3(@capacitor/core@5.7.4)
   '@capacitor/app':
     specifier: ^5.0.7
-    version: 5.0.7(@capacitor/core@5.7.3)
+    version: 5.0.7(@capacitor/core@5.7.4)
   '@capacitor/core':
-    specifier: ^5.7.3
-    version: 5.7.3
+    specifier: ^5.7.4
+    version: 5.7.4
   '@capacitor/preferences':
     specifier: ^5.0.7
-    version: 5.0.7(@capacitor/core@5.7.3)
+    version: 5.0.7(@capacitor/core@5.7.4)
   autoprefixer:
     specifier: ^10.4.18
     version: 10.4.18(postcss@8.4.37)
@@ -138,20 +138,20 @@ packages:
       '@babel/helper-validator-identifier': 7.22.20
       to-fast-properties: 2.0.0
 
-  /@capacitor/android@5.7.3(@capacitor/core@5.7.3):
+  /@capacitor/android@5.7.3(@capacitor/core@5.7.4):
     resolution: {integrity: sha512-l4FoagqyoId+D/597fG8pPfmVrNevzWzbtkJkbGtQZS5rqRR4HCNoJn0LAMs812o9bfuxGdE1T3MjpehGOe0Rw==}
     peerDependencies:
       '@capacitor/core': ^5.7.0
     dependencies:
-      '@capacitor/core': 5.7.3
+      '@capacitor/core': 5.7.4
     dev: false
 
-  /@capacitor/app@5.0.7(@capacitor/core@5.7.3):
+  /@capacitor/app@5.0.7(@capacitor/core@5.7.4):
     resolution: {integrity: sha512-oad0jwQu+vgQDukeS9UV56yG10dlxkAGGl26IQpZlTmg3dTI9qSJtvhmlLfkF0nEtoj5IsVQUPE+NLH1oZkgGQ==}
     peerDependencies:
       '@capacitor/core': ^5.0.0
     dependencies:
-      '@capacitor/core': 5.7.3
+      '@capacitor/core': 5.7.4
     dev: false
 
   /@capacitor/assets@3.0.4(@types/node@20.11.20)(typescript@5.4.2):
@@ -206,18 +206,18 @@ packages:
       - supports-color
     dev: true
 
-  /@capacitor/core@5.7.3:
-    resolution: {integrity: sha512-xEuQmP+h0tugl2N+qRcdrUavZydvTnnmtvqu/OtCBb/bKZo2PDRFft7MxuQRE2GxXs6kLy3cvwzhDAHB3a+9mw==}
+  /@capacitor/core@5.7.4:
+    resolution: {integrity: sha512-iZBgvx3o4amzKv5ttA+QHB6i7cxK+/mYpCQd1tnSdipg6ZkvfBhg1HkzhEqHk+I7MNur+QwgYDZho9+ycHRwOw==}
     dependencies:
       tslib: 2.6.2
     dev: false
 
-  /@capacitor/preferences@5.0.7(@capacitor/core@5.7.3):
+  /@capacitor/preferences@5.0.7(@capacitor/core@5.7.4):
     resolution: {integrity: sha512-JvfGP1m8nITWEFdBpKR9HXNeBjLKwO0q1pry7Z5lYrYmCrbyRBLWzaGZGll8py4KmGWL3F5+PZvhrpT4gPoeAQ==}
     peerDependencies:
       '@capacitor/core': ^5.0.0
     dependencies:
-      '@capacitor/core': 5.7.3
+      '@capacitor/core': 5.7.4
     dev: false
 
   /@cspotcode/source-map-support@0.8.1:

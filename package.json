@@ -31,7 +31,7 @@
     "@capacitor/assets": "^3.0.4",
     "@capacitor/cli": "^5.7.4",
     "@rushstack/eslint-patch": "^1.8.0",
-    "@tsconfig/node20": "^20.1.2",
+    "@tsconfig/node20": "^20.1.4",
     "@types/node": "^20.11.20",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/eslint-config-prettier": "^9.0.0",

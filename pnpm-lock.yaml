@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@capacitor/android':
-        specifier: ^5.7.5
-        version: 5.7.5(@capacitor/core@5.7.5)
+        specifier: ^5.7.7
+        version: 5.7.7(@capacitor/core@5.7.5)
       '@capacitor/app':
         specifier: ^5.0.8
         version: 5.0.8(@capacitor/core@5.7.5)
@@ -128,8 +128,8 @@ packages:
     resolution: {integrity: sha512-dQjSq/7HaSjRM43FFGnv5keM2HsxpmyV1PfaSVm0nzzjwwTmjOe6J4bC8e3+pTEIgHaHj+1ZlLThRJ2auc/w1Q==}
     engines: {node: '>=6.9.0'}
 
-  '@capacitor/android@5.7.5':
-    resolution: {integrity: sha512-VKb9VarGA2hJ8PuLk4EhSq4jvgM+V8JOoNw00WdD6Q4rbgDKSa7WIKTw75sFrNRGiwHSZ99FPvmisJfr1Spk+Q==}
+  '@capacitor/android@5.7.7':
+    resolution: {integrity: sha512-gkc8p0jjbRHu5oxKvWQV1d6zRHNeK7/GQUHOL9J6yQqnnttLDf1tSZ4BVjicMdyKlxUailuBcboWvng+KYilvQ==}
     peerDependencies:
       '@capacitor/core': ^5.7.0
 
@@ -2812,7 +2812,7 @@ snapshots:
       '@babel/helper-validator-identifier': 7.22.20
       to-fast-properties: 2.0.0
 
-  '@capacitor/android@5.7.5(@capacitor/core@5.7.5)':
+  '@capacitor/android@5.7.7(@capacitor/core@5.7.5)':
     dependencies:
       '@capacitor/core': 5.7.5
 
